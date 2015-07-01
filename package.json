@@ -1,0 +1,24 @@
+{
+  "name": "px2dt-localdata-access",
+  "version": "2.0.0-alpha1",
+  "description": "",
+  "main": "libs/main.js",
+  "repository": {
+    "url": "https://github.com/tomk79/node-px2dt-localdata-access.git"
+  },
+  "scripts": {
+    "test": "mocha --ui tdd ./tests/",
+    "documentation": "./node_modules/.bin/jsdoc -l -r --readme ./README.md -d ./docs/ libs/"
+  },
+  "author": "Tomoya Koyanagi",
+  "license": "MIT",
+  "dependencies": {
+    "glob": "*",
+    "mkdirp": "0.*",
+    "phpjs": "*",
+    "rmdir": "^1.1.0"
+  },
+  "devDependencies": {
+    "mocha": "^2.1.0"
+  }
+}
