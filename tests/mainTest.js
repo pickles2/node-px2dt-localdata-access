@@ -57,8 +57,8 @@ describe('プロジェクト情報の入出力', function() {
 				"path":__dirname+'/stub_datadir/htdocs2/',
 				'entry_script':'.px_execute.php'
 			},
-			function(result){
-				assert.ok( result );
+			function(pjCd){
+				assert.strictEqual( pjCd, 0 );
 
 				px2dtLDA.addProject(
 					{
@@ -66,8 +66,8 @@ describe('プロジェクト情報の入出力', function() {
 						"path":__dirname+'/stub_datadir/htdocs1/',
 						'entry_script':'.px_execute.php'
 					},
-					function(result){
-						assert.ok( result );
+					function(pjCd){
+						assert.strictEqual( pjCd, 0 );
 						done();
 					}
 				);

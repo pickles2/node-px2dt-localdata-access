@@ -15,10 +15,10 @@
   "dependencies": {
     "glob": "*",
     "mkdirp": "0.*",
-    "phpjs": "*",
-    "rmdir": "^1.1.0"
+    "phpjs": "*"
   },
   "devDependencies": {
-    "mocha": "^2.1.0"
+    "mocha": "^2.1.0",
+    "rmdir": "^1.1.0"
   }
 }

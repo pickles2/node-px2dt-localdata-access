@@ -9,7 +9,7 @@ module.exports = new (function(){
 	function px2dtLocalDataAccess(pathDataDir, options){
 		var _this = this;
 		this.pathDataDir = pathDataDir;
-		this.options = options;
+		this.options = options || {};
 		this.db = {};
 		this.db = this.loadSync();
 	}
@@ -68,6 +68,12 @@ module.exports = new (function(){
 
 	/**
 	 * プロジェクト情報を追加する
+	 * 
+	 * @param object pjInfo 追加するプロジェクト情報
+	 * @param function cb コールバック
+	 * 追加したプロジェクトのコードナンバーが渡されます。
+	 * プロジェクトを追加すると、nameによって並べ替えられます。
+	 * コードナンバーはプロジェクトに対して固有ではなく、並べ替えによって変更される可能性があることに注意してください。
 	 */
 	px2dtLocalDataAccess.prototype.addProject = function(pjInfo, cb){
 		cb = cb || function(){};
@@ -89,7 +95,15 @@ module.exports = new (function(){
 			return 0;
 		});
 
-		cb(true);
+		for( var pjCd in this.db.projects ){
+			pjCd = pjCd-0;
+			if( this.db.projects[pjCd].name == pjInfo.name && this.db.projects[pjCd].path == pjInfo.path && this.db.projects[pjCd].entry_script == pjInfo.entry_script ){
+				cb(pjCd);
+				return;
+			}
+		}
+
+		cb(false);
 		return this;
 	}
 
