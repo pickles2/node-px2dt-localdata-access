@@ -54,5 +54,8 @@ px2dtLDA.save(
 	}
 );
 
+// ログ情報を追記する
+px2dtLDA.log('test log message.');
+
 ```
 

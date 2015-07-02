@@ -118,6 +118,21 @@ describe('プロジェクト情報の入出力', function() {
 
 });
 
+describe('ログ情報', function() {
+	var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
+
+	it("ログ情報を追記する", function(done) {
+		px2dtLDA.log('test log 1');
+		px2dtLDA.log('test log 2');
+		px2dtLDA.log('test log 3');
+		px2dtLDA.log('test log 4');
+
+		assert.ok( fs.existsSync(_baseDir+'common_log.log') );
+		done();
+	});
+
+});
+
 describe('テスト後にデータディレクトリを削除する', function() {
 	var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 

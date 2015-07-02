@@ -144,6 +144,35 @@ module.exports = new (function(){
 	}
 
 	/**
+	 * ログ情報を保存する
+	 */
+	px2dtLocalDataAccess.prototype.log = function(msg){
+		var path = this.pathDataDir + 'common_log.log';
+		var time = ( (function(){
+			var d = new Date();
+			function pad(n){return n<10 ? '0'+n : n}
+			var rtn = '';
+			rtn +=
+				d.getUTCFullYear()+'-'
+				+ pad(d.getUTCMonth()+1)+'-'
+				+ pad(d.getUTCDate())+'T'
+				+ pad(d.getUTCHours())+':'
+				+ pad(d.getUTCMinutes())+':'
+				+ pad(d.getUTCSeconds())+'Z'
+			;
+			return rtn;
+		})() );
+		var row = [
+			time ,
+			process.pid ,
+			msg
+		].join('	');
+		// console.log(row);
+		fs.appendFileSync( path, row+"\n", {} );
+		return true;
+	}
+
+	/**
 	 * Px2DTLDAオブジェクトを作成する
 	 */
 	this.create = function(pathDataDir, options){
