@@ -5,6 +5,7 @@ module.exports = new (function(){
 	var fs = require('fs');
 	var path = require('path');
 	var mkdirp = require('mkdirp');
+	var php = require('phpjs');
 	var Promise = require("es6-promise").Promise;
 
 	function px2dtLocalDataAccess(pathDataDir, options){
@@ -22,24 +23,23 @@ module.exports = new (function(){
 		cb = cb || function(){};
 		var _this = this;
 
-		(function(){
-			return new Promise(function(rlv, rjt){
-				if( fs.existsSync() ){
-					rlv(); return;
+		(function(){ return new Promise(function(rlv, rjt){
+			if( is_dir(_this.pathDataDir) ){
+				rlv(); return;
+			}
+			if( is_file(_this.pathDataDir) ){
+				rjt(); return;
+			}
+			mkdirp(_this.pathDataDir, function (err) {
+				if (err){
+					rjt();
+				}else{
+					rlv();
 				}
-				mkdirp(_this.pathDataDir, function (err) {
-					if (err){
-						rjt();
-					}else{
-						rlv();
-					}
-				});
-				return;
-			}, function(){
-				cb(false);
 			});
-		})()
-		.then(function(){return new Promise(function(rlv, rjt){
+			return;
+		}); })()
+		.then(function(){ return new Promise(function(rlv, rjt){
 			// データJSON初期化
 			_this.db = _this.db||{};
 			_this.db.commands = _this.db.commands||{};
@@ -54,14 +54,52 @@ module.exports = new (function(){
 			_this.db.apps.texteditorForDir = _this.db.apps.texteditorForDir||'';
 			rlv();
 		}); })
-		.then(function(){return new Promise(function(rlv, rjt){
+		.then(function(){ return new Promise(function(rlv, rjt){
+			// composer.phar をインストール
+			if( is_dir(_this.pathDataDir+'/commands/composer/') ){
+				rlv(); return;
+			}
+			mkdirp(_this.pathDataDir+'/commands/composer/', function (err) {
+				if (err){
+					rjt();
+				}else{
+					rlv();
+				}
+			});
+			return;
+		}); })
+		.then(function(){ return new Promise(function(rlv, rjt){
+			// composer.phar をインストール
+			if( is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
+				rlv(); return;
+			}
+
+			var cmd = 'php -r "readfile(\'https://getcomposer.org/installer\');" | php';
+
+			var _pathCurrentDir = process.cwd();
+			process.chdir( _this.pathDataDir+'/commands/composer/' );
+			var proc = require('child_process').exec(cmd, function(){
+				rlv();
+			});
+			// console.log(_pathCurrentDir);
+			process.chdir( _pathCurrentDir );
+
+			return;
+		}); })
+		.then(function(){ return new Promise(function(rlv, rjt){
+			// データを保存
 			_this.save(function(){
 				rlv();
 			});
 		}); })
-		.then(function(){return new Promise(function(rlv, rjt){
+		.then(function(){ return new Promise(function(rlv, rjt){
 			cb(true);
+			rlv();
 		}); })
+		.catch(function(reason){
+			// console.log(reason);
+			cb(false);
+		})
 		;
 
 		return this;
@@ -217,6 +255,32 @@ module.exports = new (function(){
 	this.create = function(pathDataDir, options){
 		var px2dtLDA = new px2dtLocalDataAccess(pathDataDir, options);
 		return px2dtLDA;
+	}
+
+	/**
+	 * ファイルが存在するか調べる
+	 */
+	function is_file(path){
+		if( !fs.existsSync(path) ){
+			return false;
+		}
+		if( !fs.statSync(path).isFile() ){
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * ディレクトリが存在するか調べる
+	 */
+	function is_dir(path){
+		if( !fs.existsSync(path) ){
+			return false;
+		}
+		if( !fs.statSync(path).isDirectory() ){
+			return false;
+		}
+		return true;
 	}
 
 })();

@@ -8,6 +8,8 @@ var Promise = require("es6-promise").Promise;
 
 function dataClean( cb ){
 	cb = cb || function(){};
+	// cb(true);return;
+
 	if( fs.existsSync(_baseDir) ){
 		rmdir( _baseDir, function(){
 			cb(!fs.existsSync(_baseDir));
@@ -31,6 +33,7 @@ describe('データディレクトリを一旦削除するテスト', function()
 describe('データディレクトリを初期化するテスト', function() {
 
 	it("ディレクトリを初期化", function(done) {
+		this.timeout(30000);
 		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.initDataDir(function(result){
 			assert.ok( result );
@@ -157,4 +160,3 @@ describe('テスト後にデータディレクトリを削除する', function()
 	});
 
 });
-
