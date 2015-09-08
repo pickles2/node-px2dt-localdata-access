@@ -9,7 +9,7 @@ $ npm install px2dt-localdata-access --save
 
 ## 使い方 - Usage
 
-```
+```js
 var px2dtLDA = require('px2dt-localdata-access').create('/path/to/data_directory/');
 
 // プロジェクト情報を追加
@@ -59,3 +59,15 @@ px2dtLDA.log('test log message.');
 
 ```
 
+## オプション - Options
+
+```js
+var px2dtLDA = require('px2dt-localdata-access')
+	.create(
+		'/path/to/data_directory/',
+		{
+			"path_php": "/path/to/php" // PHPコマンドのパス
+		}
+	)
+;
+```

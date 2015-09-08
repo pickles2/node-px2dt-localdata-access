@@ -12,6 +12,7 @@ module.exports = new (function(){
 		var _this = this;
 		this.pathDataDir = pathDataDir;
 		this.options = options || {};
+		this.options.path_php = this.options.path_php||'php';
 		this.db = {};
 		this.db = this.loadSync();
 	}
@@ -39,6 +40,10 @@ module.exports = new (function(){
 			});
 			return;
 		}); })()
+		.catch(function(reason){
+			// console.log(reason);
+			cb(false);
+		})
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// データJSON初期化
 			_this.db = _this.db||{};
@@ -68,19 +73,45 @@ module.exports = new (function(){
 			});
 			return;
 		}); })
+		.catch(function(reason){
+			// console.log(reason);
+			cb(false);
+		})
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// composer.phar をインストール
 			if( is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
 				rlv(); return;
 			}
 
-			var cmd = 'php -r "readfile(\'https://getcomposer.org/installer\');" | php';
-
 			var _pathCurrentDir = process.cwd();
 			process.chdir( _this.pathDataDir+'/commands/composer/' );
+
+			var cmd = _this.options.path_php + ' -r "readfile(\'https://getcomposer.org/installer\');" | ' + _this.options.path_php;
+			// console.log(cmd);
 			var proc = require('child_process').exec(cmd, function(){
-				rlv();
+				// console.log('installing composer.phar done!');
+				rlv();return;
 			});
+			// var proc = require('child_process').spawn(
+			// 	_this.options.path_php,
+			// 	[
+			// 		'-r' ,
+			// 		'readfile(\'https://getcomposer.org/installer\');' ,
+			// 		'|' ,
+			// 		_this.options.path_php
+			// 	]
+			// );
+			// proc.stdout.on('data', function(data){
+			// 	console.log(data.toString());
+			// });
+			// proc.stderr.on('data', function(err){
+			// 	console.log(err.toString());
+			// });
+			// proc.on('close', function(){
+			// 	// console.log('completed');
+			// 	rlv();
+			// });
+
 			// console.log(_pathCurrentDir);
 			process.chdir( _pathCurrentDir );
 
@@ -89,16 +120,13 @@ module.exports = new (function(){
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// データを保存
 			_this.save(function(){
-				rlv();
+				// console.log('saving data is done.');
+				rlv(); return;
 			});
+			return;
 		}); })
-		.then(function(){ return new Promise(function(rlv, rjt){
+		.then(function(){
 			cb(true);
-			rlv();
-		}); })
-		.catch(function(reason){
-			// console.log(reason);
-			cb(false);
 		})
 		;
 

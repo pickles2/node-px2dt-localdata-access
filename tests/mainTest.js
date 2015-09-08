@@ -33,11 +33,13 @@ describe('データディレクトリを一旦削除するテスト', function()
 describe('データディレクトリを初期化するテスト', function() {
 
 	it("ディレクトリを初期化", function(done) {
-		this.timeout(30000);
+		this.timeout(90000);
 		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.initDataDir(function(result){
 			assert.ok( result );
 			assert.ok( fs.existsSync(_baseDir) );
+			assert.ok( fs.existsSync(_baseDir+'/db.json') );
+			assert.ok( fs.existsSync(_baseDir+'/commands/composer/composer.phar') );
 			done();
 		});
 	});
