@@ -5,6 +5,7 @@ module.exports = new (function(){
 	var fs = require('fs');
 	var path = require('path');
 	var mkdirp = require('mkdirp');
+	var Promise = require("es6-promise").Promise;
 
 	function px2dtLocalDataAccess(pathDataDir, options){
 		var _this = this;
@@ -19,11 +20,49 @@ module.exports = new (function(){
 	 */
 	px2dtLocalDataAccess.prototype.initDataDir = function(cb){
 		cb = cb || function(){};
+		var _this = this;
 
-		mkdirp(this.pathDataDir, function (err) {
-			if (err){ console.error(err); }
-			else{ cb(true); }
-		});
+		(function(){
+			return new Promise(function(rlv, rjt){
+				if( fs.existsSync() ){
+					rlv(); return;
+				}
+				mkdirp(_this.pathDataDir, function (err) {
+					if (err){
+						rjt();
+					}else{
+						rlv();
+					}
+				});
+				return;
+			}, function(){
+				cb(false);
+			});
+		})()
+		.then(function(){return new Promise(function(rlv, rjt){
+			// データJSON初期化
+			_this.db = _this.db||{};
+			_this.db.commands = _this.db.commands||{};
+			_this.db.projects = _this.db.projects||[];
+			_this.db.network = _this.db.network||{};
+			_this.db.network.preview = _this.db.network.preview||{};
+			_this.db.network.preview.port = _this.db.network.preview.port||'';
+			_this.db.network.appserver = _this.db.network.appserver||{};
+			_this.db.network.appserver.port = _this.db.network.appserver.port||'';
+			_this.db.apps = _this.db.apps||{};
+			_this.db.apps.texteditor = _this.db.apps.texteditor||'';
+			_this.db.apps.texteditorForDir = _this.db.apps.texteditorForDir||'';
+			rlv();
+		}); })
+		.then(function(){return new Promise(function(rlv, rjt){
+			_this.save(function(){
+				rlv();
+			});
+		}); })
+		.then(function(){return new Promise(function(rlv, rjt){
+			cb(true);
+		}); })
+		;
 
 		return this;
 	}
@@ -68,7 +107,7 @@ module.exports = new (function(){
 
 	/**
 	 * プロジェクト情報を追加する
-	 * 
+	 *
 	 * @param object pjInfo 追加するプロジェクト情報
 	 * @param function cb コールバック
 	 * 追加したプロジェクトのコードナンバーが渡されます。

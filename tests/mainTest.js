@@ -4,6 +4,7 @@ var fs = require('fs');
 var phpjs = require('phpjs');
 var rmdir = require('rmdir');
 var _baseDir = __dirname+'/stub_datadir/px2dt/';
+var Promise = require("es6-promise").Promise;
 
 function dataClean( cb ){
 	cb = cb || function(){};
@@ -17,18 +18,20 @@ function dataClean( cb ){
 	return;
 }
 
-describe('データディレクトリを初期化するテスト', function() {
-	var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
-
+describe('データディレクトリを一旦削除するテスト', function() {
 	it("テストデータを初期化", function(done) {
+		this.timeout(10000);
 		dataClean(function(result){
 			assert.ok( result );
-			done();
+			setTimeout(done, 500);
 		});
 	});
+});
 
+describe('データディレクトリを初期化するテスト', function() {
 
 	it("ディレクトリを初期化", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.initDataDir(function(result){
 			assert.ok( result );
 			assert.ok( fs.existsSync(_baseDir) );
@@ -36,21 +39,12 @@ describe('データディレクトリを初期化するテスト', function() {
 		});
 	});
 
-	it("db.json を保存", function(done) {
-		px2dtLDA.save(function(result){
-			assert.ok( result );
-			assert.ok( fs.existsSync(_baseDir+'db.json') );
-			var db = require(_baseDir+'db.json');
-			assert.ok( typeof(db) === typeof({}) );
-			done();
-		});
-	});
 });
 
 describe('プロジェクト情報の入出力', function() {
-	var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 
 	it("プロジェクト情報を追加するテスト", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.addProject(
 			{
 				"name":"TestProject2",
@@ -76,6 +70,7 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 	it("プロジェクト情報の一覧を取得するテスト", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.getProjectAll(
 			function(result){
 				assert.equal( result[0].name, "TestProject1" );
@@ -88,6 +83,7 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 	it("プロジェクト情報を取得するテスト", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.getProject(
 			0,
 			function(result){
@@ -99,6 +95,7 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 	it("プロジェクト情報を削除するテスト", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.removeProject(
 			0,
 			function(result){
@@ -118,10 +115,23 @@ describe('プロジェクト情報の入出力', function() {
 
 });
 
+describe('データを保存するテスト', function() {
+	it("db.json を保存", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
+		px2dtLDA.save(function(result){
+			assert.ok( result );
+			assert.ok( fs.existsSync(_baseDir+'db.json') );
+			var db = require(_baseDir+'db.json');
+			assert.ok( typeof(db) === typeof({}) );
+			done();
+		});
+	});
+});
+
 describe('ログ情報', function() {
-	var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 
 	it("ログ情報を追記する", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.log('test log 1');
 		px2dtLDA.log('test log 2');
 		px2dtLDA.log('test log 3');
