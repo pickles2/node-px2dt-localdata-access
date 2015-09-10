@@ -13,6 +13,8 @@ module.exports = new (function(){
 		this.pathDataDir = pathDataDir;
 		this.options = options || {};
 		this.options.path_php = this.options.path_php||'php';
+		this.options.path_php_ini = this.options.path_php_ini||null;
+		this.options.path_extension_dir = this.options.path_extension_dir||null;
 		this.db = {};
 		this.db = this.loadSync();
 	}
@@ -92,25 +94,6 @@ module.exports = new (function(){
 				// console.log('installing composer.phar done!');
 				rlv();return;
 			});
-			// var proc = require('child_process').spawn(
-			// 	_this.options.path_php,
-			// 	[
-			// 		'-r' ,
-			// 		'readfile(\'https://getcomposer.org/installer\');' ,
-			// 		'|' ,
-			// 		_this.options.path_php
-			// 	]
-			// );
-			// proc.stdout.on('data', function(data){
-			// 	console.log(data.toString());
-			// });
-			// proc.stderr.on('data', function(err){
-			// 	console.log(err.toString());
-			// });
-			// proc.on('close', function(){
-			// 	// console.log('completed');
-			// 	rlv();
-			// });
 
 			// console.log(_pathCurrentDir);
 			process.chdir( _pathCurrentDir );

@@ -67,6 +67,8 @@ var px2dtLDA = require('px2dt-localdata-access')
 		'/path/to/data_directory/',
 		{
 			"path_php": "/path/to/php" // PHPコマンドのパス
+			"path_php_ini": "/path/to/php.ini" // php.iniのパス
+			"path_extension_dir": "/path/to/ext" // extension_dirのパス
 		}
 	)
 ;
