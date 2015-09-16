@@ -155,6 +155,20 @@ module.exports = new (function(){
 	}
 
 	/**
+	 * データを取得する
+	 */
+	px2dtLocalDataAccess.prototype.getData = function(cb){
+		cb = cb || function(){};
+		var _this = this;
+		setTimeout(
+			function(){
+				cb( _this.db );
+			}, 0
+		);
+		return this;
+	}
+
+	/**
 	 * プロジェクト情報を追加する
 	 *
 	 * @param object pjInfo 追加するプロジェクト情報

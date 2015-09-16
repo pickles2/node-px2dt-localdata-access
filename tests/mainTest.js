@@ -99,6 +99,20 @@ describe('プロジェクト情報の入出力', function() {
 		);
 	});
 
+	it("データを取得するテスト", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
+		px2dtLDA.getData(
+			function(db){
+				// console.log(db);
+				assert.equal( typeof(db), typeof({}) );
+				assert.equal( typeof(db.commands), typeof({}) );
+				assert.equal( typeof(db.projects), typeof({}) );
+				assert.equal( typeof(db.apps), typeof({}) );
+				done();
+			}
+		);
+	});
+
 	it("プロジェクト情報を削除するテスト", function(done) {
 		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		px2dtLDA.removeProject(

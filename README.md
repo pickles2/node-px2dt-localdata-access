@@ -54,6 +54,13 @@ px2dtLDA.save(
 	}
 );
 
+// データを取得する
+px2dtLDA.getData(
+	function(db){
+		console.log(db);
+	}
+);
+
 // ログ情報を追記する
 px2dtLDA.log('test log message.');
 
