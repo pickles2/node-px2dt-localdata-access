@@ -7,10 +7,11 @@ module.exports = new (function(){
 	var mkdirp = require('mkdirp');
 	var php = require('phpjs');
 	var Promise = require("es6-promise").Promise;
+	var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 
 	function px2dtLocalDataAccess(pathDataDir, options){
 		var _this = this;
-		this.pathDataDir = pathDataDir;
+		this.pathDataDir = path.resolve(pathDataDir)+DIRECTORY_SEPARATOR;
 		this.options = options || {};
 		this.options.path_php = this.options.path_php||'php';
 		this.options.path_php_ini = this.options.path_php_ini||null;

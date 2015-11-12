@@ -5,6 +5,7 @@ var phpjs = require('phpjs');
 var rmdir = require('rmdir');
 var _baseDir = __dirname+'/stub_datadir/px2dt/';
 var Promise = require("es6-promise").Promise;
+var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 
 function dataClean( cb ){
 	cb = cb || function(){};
@@ -139,7 +140,7 @@ describe('プロジェクト情報の入出力', function() {
 		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
 		var pathDataDir = px2dtLDA.getPathDataDir();
 		// console.log( pathDataDir );
-		assert.equal( path.resolve(__dirname, 'stub_datadir/px2dt')+'/', pathDataDir );
+		assert.equal( path.resolve(__dirname, 'stub_datadir/px2dt')+DIRECTORY_SEPARATOR, pathDataDir );
 		done();
 	});
 
