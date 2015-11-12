@@ -61,6 +61,10 @@ px2dtLDA.getData(
 	}
 );
 
+// データディレクトリのパスを取得する
+var pathDataDir = px2dtLDA.getPathDataDir();
+console.log( pathDataDir );
+
 // ログ情報を追記する
 px2dtLDA.log('test log message.');
 

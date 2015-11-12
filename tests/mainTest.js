@@ -46,6 +46,28 @@ describe('データディレクトリを初期化するテスト', function() {
 
 });
 
+describe('ファイルとディレクトリの存在確認テスト', function() {
+
+	it("ファイル", function(done) {
+		this.timeout(3000);
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
+		assert.strictEqual( px2dtLDA.is_file(__dirname+'/stub_datadir/'), false );
+		assert.strictEqual( px2dtLDA.is_file(__dirname+'/stub_datadir/.gitkeep'), true );
+		assert.strictEqual( px2dtLDA.is_file(__dirname+'/stub_datadir/notExists.txt'), false );
+		done();
+	});
+
+	it("ディレクトリ", function(done) {
+		this.timeout(3000);
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
+		assert.strictEqual( px2dtLDA.is_dir(__dirname+'/stub_datadir/'), true );
+		assert.strictEqual( px2dtLDA.is_dir(__dirname+'/stub_datadir/.gitkeep'), false );
+		assert.strictEqual( px2dtLDA.is_dir(__dirname+'/stub_datadir/notExists.txt'), false );
+		done();
+	});
+
+});
+
 describe('プロジェクト情報の入出力', function() {
 
 	it("プロジェクト情報を追加するテスト", function(done) {
@@ -111,6 +133,14 @@ describe('プロジェクト情報の入出力', function() {
 				done();
 			}
 		);
+	});
+
+	it("データディレクトリのパスを取得するテスト", function(done) {
+		var px2dtLDA = require('../libs/main.js').create(_baseDir, {});
+		var pathDataDir = px2dtLDA.getPathDataDir();
+		// console.log( pathDataDir );
+		assert.equal( path.resolve(__dirname, 'stub_datadir/px2dt')+'/', pathDataDir );
+		done();
 	});
 
 	it("プロジェクト情報を削除するテスト", function(done) {

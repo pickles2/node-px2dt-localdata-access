@@ -27,10 +27,10 @@ module.exports = new (function(){
 		var _this = this;
 
 		(function(){ return new Promise(function(rlv, rjt){
-			if( is_dir(_this.pathDataDir) ){
+			if( _this.is_dir(_this.pathDataDir) ){
 				rlv(); return;
 			}
-			if( is_file(_this.pathDataDir) ){
+			if( _this.is_file(_this.pathDataDir) ){
 				rjt(); return;
 			}
 			mkdirp(_this.pathDataDir, function (err) {
@@ -63,7 +63,7 @@ module.exports = new (function(){
 		}); })
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// composer.phar をインストール
-			if( is_dir(_this.pathDataDir+'/commands/composer/') ){
+			if( _this.is_dir(_this.pathDataDir+'/commands/composer/') ){
 				rlv(); return;
 			}
 			mkdirp(_this.pathDataDir+'/commands/composer/', function (err) {
@@ -81,7 +81,7 @@ module.exports = new (function(){
 		})
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// composer.phar をインストール
-			if( is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
+			if( _this.is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
 				rlv(); return;
 			}
 
@@ -275,17 +275,16 @@ module.exports = new (function(){
 	}
 
 	/**
-	 * Px2DTLDAオブジェクトを作成する
+	 * データディレクトリのパスを取得する
 	 */
-	this.create = function(pathDataDir, options){
-		var px2dtLDA = new px2dtLocalDataAccess(pathDataDir, options);
-		return px2dtLDA;
+	px2dtLocalDataAccess.prototype.getPathDataDir = function(){
+		return this.pathDataDir;
 	}
 
 	/**
 	 * ファイルが存在するか調べる
 	 */
-	function is_file(path){
+	px2dtLocalDataAccess.prototype.is_file = function(path){
 		if( !fs.existsSync(path) ){
 			return false;
 		}
@@ -298,7 +297,7 @@ module.exports = new (function(){
 	/**
 	 * ディレクトリが存在するか調べる
 	 */
-	function is_dir(path){
+	px2dtLocalDataAccess.prototype.is_dir = function(path){
 		if( !fs.existsSync(path) ){
 			return false;
 		}
@@ -306,6 +305,14 @@ module.exports = new (function(){
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Px2DTLDAオブジェクトを作成する
+	 */
+	this.create = function(pathDataDir, options){
+		var px2dtLDA = new px2dtLocalDataAccess(pathDataDir, options);
+		return px2dtLDA;
 	}
 
 })();
