@@ -1,6 +1,6 @@
 {
   "name": "px2dt-localdata-access",
-  "version": "2.0.0-alpha.3",
+  "version": "2.0.0-alpha.3+nb",
   "description": "",
   "main": "libs/main.js",
   "repository": {
