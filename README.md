@@ -1,4 +1,7 @@
-# tomk79/node-px2dt-localdata-access
+# pickles2/node-px2dt-localdata-access
+
+pickles2/node-px2dt-localdata-access は、Pickles2 Desktop Tool のデスクトップツールに共通する機能を提供します。
+
 
 ## インストール - Install
 

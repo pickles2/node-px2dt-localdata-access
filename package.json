@@ -1,10 +1,10 @@
 {
   "name": "px2dt-localdata-access",
-  "version": "2.0.0-alpha1",
+  "version": "2.0.0-alpha2",
   "description": "",
   "main": "libs/main.js",
   "repository": {
-    "url": "https://github.com/tomk79/node-px2dt-localdata-access.git"
+    "url": "https://github.com/pickles2/node-px2dt-localdata-access.git"
   },
   "scripts": {
     "test": "mocha --ui tdd ./tests/",
