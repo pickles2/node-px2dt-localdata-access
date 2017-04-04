@@ -6,6 +6,7 @@ module.exports = function(pathDataDir, options){
 	var path = require('path');
 	var mkdirp = require('mkdirp');
 	var php = require('phpjs');
+	var utils79 = require('utils79');
 	var Promise = require("es6-promise").Promise;
 	var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 
@@ -24,10 +25,10 @@ module.exports = function(pathDataDir, options){
 		var _this = this;
 
 		(function(){ return new Promise(function(rlv, rjt){
-			if( _this.is_dir(_this.pathDataDir) ){
+			if( utils79.is_dir(_this.pathDataDir) ){
 				rlv(); return;
 			}
-			if( _this.is_file(_this.pathDataDir) ){
+			if( utils79.is_file(_this.pathDataDir) ){
 				rjt(); return;
 			}
 			mkdirp(_this.pathDataDir, function (err) {
@@ -60,7 +61,7 @@ module.exports = function(pathDataDir, options){
 		}); })
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// composer.phar をインストール
-			if( _this.is_dir(_this.pathDataDir+'/commands/composer/') ){
+			if( utils79.is_dir(_this.pathDataDir+'/commands/composer/') ){
 				rlv(); return;
 			}
 			mkdirp(_this.pathDataDir+'/commands/composer/', function (err) {
@@ -78,7 +79,7 @@ module.exports = function(pathDataDir, options){
 		})
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// composer.phar をインストール
-			if( _this.is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
+			if( utils79.is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
 				rlv(); return;
 			}
 
@@ -141,14 +142,19 @@ module.exports = function(pathDataDir, options){
 	/**
 	 * データを保存する
 	 */
-	this.save = function(cb){
-		cb = cb || function(){};
-		fs.writeFile(this.pathDataDir+'/db.json', JSON.stringify(this.db,null,1), function(err){
-			var result = true;
-			if(err){result = false;}
-			cb(result);
-		});
-		return this;
+	this.save = function(callback){
+		callback = callback || function(){};
+		try {
+			fs.writeFile(this.pathDataDir+'/db.json', JSON.stringify(this.db,null,1), function(err){
+				var result = true;
+				if(err){result = false;}
+				callback(result);
+			});
+		} catch (e) {
+			console.error('FAILED to save db.json');
+			callback(false);
+		}
+		return;
 	}
 
 	/**
@@ -278,31 +284,6 @@ module.exports = function(pathDataDir, options){
 		return this.pathDataDir;
 	}
 
-	/**
-	 * ファイルが存在するか調べる
-	 */
-	this.is_file = function(path){
-		if( !fs.existsSync(path) ){
-			return false;
-		}
-		if( !fs.statSync(path).isFile() ){
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * ディレクトリが存在するか調べる
-	 */
-	this.is_dir = function(path){
-		if( !fs.existsSync(path) ){
-			return false;
-		}
-		if( !fs.statSync(path).isDirectory() ){
-			return false;
-		}
-		return true;
-	}
 
 	// データオブジェクトをロード
 	this.db = {};

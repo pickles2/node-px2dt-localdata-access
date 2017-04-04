@@ -2,6 +2,7 @@ var assert = require('assert');
 var path = require('path');
 var fs = require('fs');
 var phpjs = require('phpjs');
+var utils79 = require('utils79');
 var rmdir = require('rmdir');
 var _baseDir = __dirname+'/stub_datadir/px2dt/';
 var Promise = require("es6-promise").Promise;
@@ -53,18 +54,18 @@ describe('ファイルとディレクトリの存在確認テスト', function()
 	it("ファイル", function(done) {
 		this.timeout(3000);
 		var px2dtLDA = new Px2DtLDA(_baseDir, {});
-		assert.strictEqual( px2dtLDA.is_file(__dirname+'/stub_datadir/'), false );
-		assert.strictEqual( px2dtLDA.is_file(__dirname+'/stub_datadir/.gitkeep'), true );
-		assert.strictEqual( px2dtLDA.is_file(__dirname+'/stub_datadir/notExists.txt'), false );
+		assert.strictEqual( utils79.is_file(__dirname+'/stub_datadir/'), false );
+		assert.strictEqual( utils79.is_file(__dirname+'/stub_datadir/.gitkeep'), true );
+		assert.strictEqual( utils79.is_file(__dirname+'/stub_datadir/notExists.txt'), false );
 		done();
 	});
 
 	it("ディレクトリ", function(done) {
 		this.timeout(3000);
 		var px2dtLDA = new Px2DtLDA(_baseDir, {});
-		assert.strictEqual( px2dtLDA.is_dir(__dirname+'/stub_datadir/'), true );
-		assert.strictEqual( px2dtLDA.is_dir(__dirname+'/stub_datadir/.gitkeep'), false );
-		assert.strictEqual( px2dtLDA.is_dir(__dirname+'/stub_datadir/notExists.txt'), false );
+		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/'), true );
+		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/.gitkeep'), false );
+		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/notExists.txt'), false );
 		done();
 	});
 
