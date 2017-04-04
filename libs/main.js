@@ -1,7 +1,7 @@
 /**
  * px2dt-localdata-access
  */
-module.exports = new (function(){
+module.exports = function(pathDataDir, options){
 	var fs = require('fs');
 	var path = require('path');
 	var mkdirp = require('mkdirp');
@@ -9,21 +9,17 @@ module.exports = new (function(){
 	var Promise = require("es6-promise").Promise;
 	var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 
-	function px2dtLocalDataAccess(pathDataDir, options){
-		var _this = this;
-		this.pathDataDir = path.resolve(pathDataDir)+DIRECTORY_SEPARATOR;
-		this.options = options || {};
-		this.options.path_php = this.options.path_php||'php';
-		this.options.path_php_ini = this.options.path_php_ini||null;
-		this.options.path_extension_dir = this.options.path_extension_dir||null;
-		this.db = {};
-		this.db = this.loadSync();
-	}
+	var _this = this;
+	this.pathDataDir = path.resolve(pathDataDir)+DIRECTORY_SEPARATOR;
+	this.options = options || {};
+	this.options.path_php = this.options.path_php||'php';
+	this.options.path_php_ini = this.options.path_php_ini||null;
+	this.options.path_extension_dir = this.options.path_extension_dir||null;
 
 	/**
 	 * データディレクトリの初期化
 	 */
-	px2dtLocalDataAccess.prototype.initDataDir = function(cb){
+	this.initDataDir = function(cb){
 		cb = cb || function(){};
 		var _this = this;
 
@@ -120,7 +116,7 @@ module.exports = new (function(){
 	/**
 	 * データを読み込む(同期)
 	 */
-	px2dtLocalDataAccess.prototype.loadSync = function(){
+	this.loadSync = function(){
 		var db = {};
 		if( fs.existsSync(this.pathDataDir+'/db.json') ){
 			db = require( this.pathDataDir+'/db.json' );
@@ -131,7 +127,7 @@ module.exports = new (function(){
 	/**
 	 * データを読み込む
 	 */
-	px2dtLocalDataAccess.prototype.load = function(cb){
+	this.load = function(cb){
 		cb = cb || function(){};
 
 		var db = {};
@@ -145,7 +141,7 @@ module.exports = new (function(){
 	/**
 	 * データを保存する
 	 */
-	px2dtLocalDataAccess.prototype.save = function(cb){
+	this.save = function(cb){
 		cb = cb || function(){};
 		fs.writeFile(this.pathDataDir+'/db.json', JSON.stringify(this.db,null,1), function(err){
 			var result = true;
@@ -158,7 +154,7 @@ module.exports = new (function(){
 	/**
 	 * データを取得する
 	 */
-	px2dtLocalDataAccess.prototype.getData = function(cb){
+	this.getData = function(cb){
 		cb = cb || function(){};
 		var _this = this;
 		setTimeout(
@@ -178,7 +174,7 @@ module.exports = new (function(){
 	 * プロジェクトを追加すると、nameによって並べ替えられます。
 	 * コードナンバーはプロジェクトに対して固有ではなく、並べ替えによって変更される可能性があることに注意してください。
 	 */
-	px2dtLocalDataAccess.prototype.addProject = function(pjInfo, cb){
+	this.addProject = function(pjInfo, cb){
 		cb = cb || function(){};
 		this.db = this.db || {};
 		this.db.projects = this.db.projects || [];
@@ -213,7 +209,7 @@ module.exports = new (function(){
 	/**
 	 * プロジェクト情報の一覧を取得する
 	 */
-	px2dtLocalDataAccess.prototype.getProjectAll = function(cb){
+	this.getProjectAll = function(cb){
 		cb = cb || function(){};
 		cb(this.db.projects);
 		return this;
@@ -222,7 +218,7 @@ module.exports = new (function(){
 	/**
 	 * プロジェクト情報を取得する
 	 */
-	px2dtLocalDataAccess.prototype.getProject = function(pjCd, cb){
+	this.getProject = function(pjCd, cb){
 		cb = cb || function(){};
 		cb(this.db.projects[pjCd]);
 		return this;
@@ -231,7 +227,7 @@ module.exports = new (function(){
 	/**
 	 * プロジェクト情報を削除する
 	 */
-	px2dtLocalDataAccess.prototype.removeProject = function(pjCd, cb){
+	this.removeProject = function(pjCd, cb){
 		cb = cb || function(){};
 		if(typeof(pjCd) != typeof(0)){
 			cb(false);
@@ -249,7 +245,7 @@ module.exports = new (function(){
 	/**
 	 * ログ情報を保存する
 	 */
-	px2dtLocalDataAccess.prototype.log = function(msg){
+	this.log = function(msg){
 		var path = this.pathDataDir + 'common_log.log';
 		var time = ( (function(){
 			var d = new Date();
@@ -278,14 +274,14 @@ module.exports = new (function(){
 	/**
 	 * データディレクトリのパスを取得する
 	 */
-	px2dtLocalDataAccess.prototype.getPathDataDir = function(){
+	this.getPathDataDir = function(){
 		return this.pathDataDir;
 	}
 
 	/**
 	 * ファイルが存在するか調べる
 	 */
-	px2dtLocalDataAccess.prototype.is_file = function(path){
+	this.is_file = function(path){
 		if( !fs.existsSync(path) ){
 			return false;
 		}
@@ -298,7 +294,7 @@ module.exports = new (function(){
 	/**
 	 * ディレクトリが存在するか調べる
 	 */
-	px2dtLocalDataAccess.prototype.is_dir = function(path){
+	this.is_dir = function(path){
 		if( !fs.existsSync(path) ){
 			return false;
 		}
@@ -308,12 +304,7 @@ module.exports = new (function(){
 		return true;
 	}
 
-	/**
-	 * Px2DTLDAオブジェクトを作成する
-	 */
-	this.create = function(pathDataDir, options){
-		var px2dtLDA = new px2dtLocalDataAccess(pathDataDir, options);
-		return px2dtLDA;
-	}
-
-})();
+	// データオブジェクトをロード
+	this.db = {};
+	this.db = this.loadSync();
+};
