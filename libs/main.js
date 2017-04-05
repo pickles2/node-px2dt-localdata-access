@@ -27,25 +27,27 @@ module.exports = function(pathDataDir, options){
 		var _this = this;
 
 		(function(){ return new Promise(function(rlv, rjt){
+			rlv();return;
+		}); })()
+		.then(function(){ return new Promise(function(rlv, rjt){
 			if( utils79.is_dir(_this.pathDataDir) ){
 				rlv(); return;
 			}
 			if( utils79.is_file(_this.pathDataDir) ){
-				rjt(); return;
+				console.error('FAILED to initialize data directory; A file is Already exists; - '+_this.pathDataDir);
+				callback(false);
+				return;
 			}
 			mkdirp(_this.pathDataDir, function (err) {
 				if (err){
-					rjt();
-				}else{
-					rlv();
+					console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir);
+					callback(false);
+					return;
 				}
+				rlv();
 			});
 			return;
-		}); })()
-		.catch(function(reason){
-			// console.log(reason);
-			callback(false);
-		})
+		}); })
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// データJSON初期化
 			_this.db = _this.db||{};
@@ -62,23 +64,20 @@ module.exports = function(pathDataDir, options){
 			rlv();
 		}); })
 		.then(function(){ return new Promise(function(rlv, rjt){
-			// composer.phar をインストール
+			// composer.phar のインストール先ディレクトリ作成
 			if( utils79.is_dir(_this.pathDataDir+'/commands/composer/') ){
 				rlv(); return;
 			}
 			mkdirp(_this.pathDataDir+'/commands/composer/', function (err) {
 				if (err){
-					rjt();
-				}else{
-					rlv();
+					console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir+'/commands/composer/');
+					callback(false);
+					return;
 				}
+				rlv();
 			});
 			return;
 		}); })
-		.catch(function(reason){
-			// console.log(reason);
-			callback(false);
-		})
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// composer.phar をインストール
 			var pathComposerPhar = {
@@ -96,8 +95,6 @@ module.exports = function(pathDataDir, options){
 				if( err ){
 					console.error('FAILED to copy composer.phar.');
 					console.error(err);
-					rlv(); return;
-					return;
 				}
 				rlv(); return;
 				return;

@@ -1,7 +1,7 @@
 {
   "name": "px2dt-localdata-access",
-  "version": "2.0.0-alpha.3+nb",
-  "description": "",
+  "version": "2.0.0-beta.1+nb",
+  "description": "Pickles 2 のデスクトップアプリケーションに共通する機能を提供します。",
   "main": "libs/main.js",
   "repository": {
     "url": "https://github.com/pickles2/node-px2dt-localdata-access.git"

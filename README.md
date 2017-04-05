@@ -1,6 +1,6 @@
-# pickles2/node-px2dt-localdata-access
+# px2dt-localdata-access
 
-pickles2/node-px2dt-localdata-access は、Pickles2 Desktop Tool のデスクトップツールに共通する機能を提供します。
+px2dt-localdata-access は、 Pickles 2 のデスクトップアプリケーションに共通する機能を提供します。
 
 
 ## インストール - Install
@@ -16,6 +16,13 @@ $ npm install px2dt-localdata-access --save
 var Px2DtLDA = require('px2dt-localdata-access'),
 	px2dtLDA = new Px2DtLDA('/path/to/data_directory/');
 
+// データディレクトリを初期化
+px2dtLDA.initDataDir(
+	function(result){
+		console.log(result);
+	}
+);
+
 // プロジェクト情報を追加
 px2dtLDA.addProject(
 	{
@@ -23,14 +30,14 @@ px2dtLDA.addProject(
 		"path":"/path/to/your/project/",
 		"entry_script":".px_execute.php"
 	} ,
-	function(pjCd){
-		console.log(pjCd);
+	function(projectIndexNumber){
+		console.log(projectIndexNumber);
 	}
 );
 
 // プロジェクト情報を取得
 px2dtLDA.getProject(
-	0,
+	0, // <- projectIndexNumber
 	function(pjInfo){
 		console.log(pjInfo);
 	}
@@ -45,7 +52,7 @@ px2dtLDA.getProjectAll(
 
 // プロジェクト情報を削除
 px2dtLDA.removeProject(
-	0,
+	0, // <- projectIndexNumber
 	function(result){
 		console.log(result);
 	}
@@ -74,7 +81,7 @@ px2dtLDA.log('test log message.');
 
 ```
 
-## オプション - Options
+## 初期化オプション - Initialize Options
 
 ```js
 var Px2DtLDA = require('px2dt-localdata-access'),
