@@ -191,7 +191,10 @@ describe('ログ情報', function() {
 		px2dtLDA.log('test log 3');
 		px2dtLDA.log('test log 4');
 
-		assert.ok( fs.existsSync(_baseDir+'common_log.log') );
+		// var logText = fs.readFileSync(_baseDir+'common_log.log').toString();
+		// console.log(logText);
+
+		assert.ok( utils79.is_file(_baseDir+'common_log.log') );
 		done();
 	});
 
@@ -202,8 +205,8 @@ describe('テスト後にデータディレクトリを削除する', function()
 	it("テスト後の後始末", function(done) {
 		dataClean(function(result){
 			assert.ok( result );
-			assert.ok( !fs.existsSync(_baseDir+'db.json') );
-			assert.ok( !fs.existsSync(_baseDir) );
+			assert.ok( !utils79.is_file(_baseDir+'db.json') );
+			assert.ok( !utils79.is_dir(_baseDir) );
 			done();
 		});
 

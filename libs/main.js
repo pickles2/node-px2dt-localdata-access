@@ -160,17 +160,22 @@ module.exports = function(pathDataDir, options){
 				var result = true;
 				if(err){
 					result = false;
+					_this.log('ERROR on saving db.json; FAILED to save db.json.tmp; ' + err);
 					callback(result);
 					return;
 				}
 
-				fs.renameSync(_path_db+'.tmp', _path_db);
-				callback( (utils79.is_file(_path_db) && !utils79.is_file(_path_db+'.tmp') ) );
+				err = fs.renameSync(_path_db+'.tmp', _path_db);
+				if( err ){
+					_this.log('ERROR on saving db.json; FAILED to rename db.json.tmp to db.json; ' + err);
+				}
+				// _this.log('Success to save db.json;');
+				callback( (err === undefined ? true : false) );
 				return;
 			});
 			return;
 		} catch (e) {
-			console.error('FAILED to save db.json');
+			_this.log('ERROR on saving db.json; FAILED to save db.json with unknown error.');
 			callback(false);
 		}
 		return;
