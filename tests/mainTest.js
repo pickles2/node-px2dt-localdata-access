@@ -174,6 +174,7 @@ describe('データを保存するテスト', function() {
 		px2dtLDA.save(function(result){
 			assert.ok( result );
 			assert.ok( utils79.is_file(_baseDir+'db.json') );
+			assert.ok( !utils79.is_file(_baseDir+'db.json.tmp') );
 			var db = JSON.parse(fs.readFileSync(_baseDir+'db.json').toString());
 			assert.ok( typeof(db) === typeof({}) );
 			done();

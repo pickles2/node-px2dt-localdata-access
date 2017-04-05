@@ -154,12 +154,21 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.save = function(callback){
 		callback = callback || function(){};
+		var _path_db = this.pathDataDir+'/db.json';
 		try {
-			fs.writeFile(this.pathDataDir+'/db.json', JSON.stringify(this.db,null,1), function(err){
+			fs.writeFile(_path_db+'.tmp', JSON.stringify(this.db,null,1), function(err){
 				var result = true;
-				if(err){result = false;}
-				callback(result);
+				if(err){
+					result = false;
+					callback(result);
+					return;
+				}
+
+				fs.renameSync(_path_db+'.tmp', _path_db);
+				callback( (utils79.is_file(_path_db) && !utils79.is_file(_path_db+'.tmp') ) );
+				return;
 			});
+			return;
 		} catch (e) {
 			console.error('FAILED to save db.json');
 			callback(false);
