@@ -119,8 +119,13 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.loadSync = function(){
 		var db = {};
-		if( fs.existsSync(this.pathDataDir+'/db.json') ){
-			db = require( this.pathDataDir+'/db.json' );
+		if( utils79.is_file(this.pathDataDir+'/db.json') ){
+			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+			try {
+				db = JSON.parse(json.toString());
+			} catch (e) {
+				console.error('FAILED to parse db.json');
+			}
 		}
 		return db;
 	}
@@ -128,14 +133,19 @@ module.exports = function(pathDataDir, options){
 	/**
 	 * データを読み込む
 	 */
-	this.load = function(cb){
-		cb = cb || function(){};
+	this.load = function(callback){
+		callback = callback || function(){};
 
 		var db = {};
-		if( fs.existsSync(this.pathDataDir+'/db.json') ){
-			db = require( this.pathDataDir+'/db.json' );
+		if( utils79.is_file(this.pathDataDir+'/db.json') ){
+			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+			try {
+				db = JSON.parse(json.toString());
+			} catch (e) {
+				console.error('FAILED to parse db.json');
+			}
 		}
-		cb(db);
+		callback(db);
 		return this;
 	}
 
@@ -160,12 +170,12 @@ module.exports = function(pathDataDir, options){
 	/**
 	 * データを取得する
 	 */
-	this.getData = function(cb){
-		cb = cb || function(){};
+	this.getData = function(callback){
+		callback = callback || function(){};
 		var _this = this;
 		setTimeout(
 			function(){
-				cb( _this.db );
+				callback( _this.db );
 			}, 0
 		);
 		return this;
@@ -175,20 +185,20 @@ module.exports = function(pathDataDir, options){
 	 * プロジェクト情報を追加する
 	 *
 	 * @param object pjInfo 追加するプロジェクト情報
-	 * @param function cb コールバック
+	 * @param function callback コールバック
 	 * 追加したプロジェクトのコードナンバーが渡されます。
 	 * プロジェクトを追加すると、nameによって並べ替えられます。
 	 * コードナンバーはプロジェクトに対して固有ではなく、並べ替えによって変更される可能性があることに注意してください。
 	 */
-	this.addProject = function(pjInfo, cb){
-		cb = cb || function(){};
+	this.addProject = function(pjInfo, callback){
+		callback = callback || function(){};
 		this.db = this.db || {};
 		this.db.projects = this.db.projects || [];
 
-		if(typeof(pjInfo) !== typeof({})){ cb(false);return this; }
-		if(typeof(pjInfo.name) !== typeof('')){ cb(false);return this; }
-		if(typeof(pjInfo.path) !== typeof('')){ cb(false);return this; }
-		if(typeof(pjInfo.entry_script) !== typeof('')){ cb(false);return this; }
+		if(typeof(pjInfo) !== typeof({})){ callback(false);return this; }
+		if(typeof(pjInfo.name) !== typeof('')){ callback(false);return this; }
+		if(typeof(pjInfo.path) !== typeof('')){ callback(false);return this; }
+		if(typeof(pjInfo.entry_script) !== typeof('')){ callback(false);return this; }
 
 		this.db.projects.push(pjInfo);
 
@@ -203,49 +213,49 @@ module.exports = function(pathDataDir, options){
 		for( var pjCd in this.db.projects ){
 			pjCd = pjCd-0;
 			if( this.db.projects[pjCd].name == pjInfo.name && this.db.projects[pjCd].path == pjInfo.path && this.db.projects[pjCd].entry_script == pjInfo.entry_script ){
-				cb(pjCd);
+				callback(pjCd);
 				return;
 			}
 		}
 
-		cb(false);
+		callback(false);
 		return this;
 	}
 
 	/**
 	 * プロジェクト情報の一覧を取得する
 	 */
-	this.getProjectAll = function(cb){
-		cb = cb || function(){};
-		cb(this.db.projects);
-		return this;
+	this.getProjectAll = function(callback){
+		callback = callback || function(){};
+		callback(this.db.projects);
+		return;
 	}
 
 	/**
 	 * プロジェクト情報を取得する
 	 */
-	this.getProject = function(pjCd, cb){
-		cb = cb || function(){};
-		cb(this.db.projects[pjCd]);
-		return this;
+	this.getProject = function(pjCd, callback){
+		callback = callback || function(){};
+		callback(this.db.projects[pjCd]);
+		return;
 	}
 
 	/**
 	 * プロジェクト情報を削除する
 	 */
-	this.removeProject = function(pjCd, cb){
-		cb = cb || function(){};
+	this.removeProject = function(pjCd, callback){
+		callback = callback || function(){};
 		if(typeof(pjCd) != typeof(0)){
-			cb(false);
-			return this;
+			callback(false);
+			return;
 		}
 
 		var beforeLen = this.db.projects.length;
 		this.db.projects.splice( pjCd, 1 );
 		var afterLen = this.db.projects.length;
 
-		cb( beforeLen === (afterLen+1) );
-		return this;
+		callback( beforeLen === (afterLen+1) );
+		return;
 	}
 
 	/**

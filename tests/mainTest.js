@@ -7,7 +7,8 @@ var rmdir = require('rmdir');
 var _baseDir = __dirname+'/stub_datadir/px2dt/';
 var Promise = require("es6-promise").Promise;
 var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
-var Px2DtLDA = require('../libs/main.js');
+var Px2DtLDA = require('../libs/main.js'),
+	px2dtLDA = new Px2DtLDA(_baseDir, {});
 
 function dataClean( cb ){
 	cb = cb || function(){};
@@ -37,7 +38,7 @@ describe('データディレクトリを初期化するテスト', function() {
 
 	it("ディレクトリを初期化", function(done) {
 		this.timeout(90000);
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		px2dtLDA.initDataDir(function(result){
 			assert.ok( result );
 			assert.ok( fs.existsSync(_baseDir) );
@@ -53,7 +54,7 @@ describe('ファイルとディレクトリの存在確認テスト', function()
 
 	it("ファイル", function(done) {
 		this.timeout(3000);
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		assert.strictEqual( utils79.is_file(__dirname+'/stub_datadir/'), false );
 		assert.strictEqual( utils79.is_file(__dirname+'/stub_datadir/.gitkeep'), true );
 		assert.strictEqual( utils79.is_file(__dirname+'/stub_datadir/notExists.txt'), false );
@@ -62,7 +63,7 @@ describe('ファイルとディレクトリの存在確認テスト', function()
 
 	it("ディレクトリ", function(done) {
 		this.timeout(3000);
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/'), true );
 		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/.gitkeep'), false );
 		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/notExists.txt'), false );
@@ -74,7 +75,7 @@ describe('ファイルとディレクトリの存在確認テスト', function()
 describe('プロジェクト情報の入出力', function() {
 
 	it("プロジェクト情報を追加するテスト", function(done) {
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		px2dtLDA.addProject(
 			{
 				"name":"TestProject2",
@@ -100,7 +101,7 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 	it("プロジェクト情報の一覧を取得するテスト", function(done) {
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		px2dtLDA.getProjectAll(
 			function(result){
 				assert.equal( result[0].name, "TestProject1" );
@@ -113,7 +114,7 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 	it("プロジェクト情報を取得するテスト", function(done) {
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		px2dtLDA.getProject(
 			0,
 			function(result){
@@ -125,7 +126,7 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 	it("データを取得するテスト", function(done) {
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		px2dtLDA.getData(
 			function(db){
 				// console.log(db);
@@ -139,7 +140,7 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 	it("データディレクトリのパスを取得するテスト", function(done) {
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		var pathDataDir = px2dtLDA.getPathDataDir();
 		// console.log( pathDataDir );
 		assert.equal( path.resolve(__dirname, 'stub_datadir/px2dt')+DIRECTORY_SEPARATOR, pathDataDir );
@@ -147,7 +148,7 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 	it("プロジェクト情報を削除するテスト", function(done) {
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		px2dtLDA.removeProject(
 			0,
 			function(result){
@@ -169,11 +170,11 @@ describe('プロジェクト情報の入出力', function() {
 
 describe('データを保存するテスト', function() {
 	it("db.json を保存", function(done) {
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		px2dtLDA.save(function(result){
 			assert.ok( result );
-			assert.ok( fs.existsSync(_baseDir+'db.json') );
-			var db = require(_baseDir+'db.json');
+			assert.ok( utils79.is_file(_baseDir+'db.json') );
+			var db = JSON.parse(fs.readFileSync(_baseDir+'db.json').toString());
 			assert.ok( typeof(db) === typeof({}) );
 			done();
 		});
@@ -183,7 +184,7 @@ describe('データを保存するテスト', function() {
 describe('ログ情報', function() {
 
 	it("ログ情報を追記する", function(done) {
-		var px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 		px2dtLDA.log('test log 1');
 		px2dtLDA.log('test log 2');
 		px2dtLDA.log('test log 3');
@@ -196,7 +197,6 @@ describe('ログ情報', function() {
 });
 
 describe('テスト後にデータディレクトリを削除する', function() {
-	var px2dtLDA = new Px2DtLDA(_baseDir, {});
 
 	it("テスト後の後始末", function(done) {
 		dataClean(function(result){
