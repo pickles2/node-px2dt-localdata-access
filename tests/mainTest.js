@@ -41,9 +41,9 @@ describe('データディレクトリを初期化するテスト', function() {
 
 		px2dtLDA.initDataDir(function(result){
 			assert.ok( result );
-			assert.ok( fs.existsSync(_baseDir) );
-			assert.ok( fs.existsSync(_baseDir+'/db.json') );
-			assert.ok( fs.existsSync(_baseDir+'/commands/composer/composer.phar') );
+			assert.ok( utils79.is_dir(_baseDir) );
+			assert.ok( utils79.is_file(_baseDir+'/db.json') );
+			assert.ok( utils79.is_file(_baseDir+'/commands/composer/composer.phar') );
 			done();
 		});
 	});

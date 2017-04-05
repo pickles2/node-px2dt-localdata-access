@@ -3,6 +3,7 @@
  */
 module.exports = function(pathDataDir, options){
 	var fs = require('fs');
+	var fsX = require('fs-extra');
 	var path = require('path');
 	var mkdirp = require('mkdirp');
 	var php = require('phpjs');
@@ -11,6 +12,7 @@ module.exports = function(pathDataDir, options){
 	var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 
 	var _this = this;
+	this.db = {}; // db.json
 	this.pathDataDir = path.resolve(pathDataDir)+DIRECTORY_SEPARATOR;
 	this.options = options || {};
 	this.options.path_php = this.options.path_php||'php';
@@ -20,8 +22,8 @@ module.exports = function(pathDataDir, options){
 	/**
 	 * データディレクトリの初期化
 	 */
-	this.initDataDir = function(cb){
-		cb = cb || function(){};
+	this.initDataDir = function(callback){
+		callback = callback || function(){};
 		var _this = this;
 
 		(function(){ return new Promise(function(rlv, rjt){
@@ -42,7 +44,7 @@ module.exports = function(pathDataDir, options){
 		}); })()
 		.catch(function(reason){
 			// console.log(reason);
-			cb(false);
+			callback(false);
 		})
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// データJSON初期化
@@ -75,26 +77,31 @@ module.exports = function(pathDataDir, options){
 		}); })
 		.catch(function(reason){
 			// console.log(reason);
-			cb(false);
+			callback(false);
 		})
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// composer.phar をインストール
+			var pathComposerPhar = {
+				'from': require('path').resolve(__dirname+'/../files/composer.phar') ,
+				'to': require('path').resolve(_this.pathDataDir+'/commands/composer/composer.phar')
+			};
+			_this.db.commands.composer = pathComposerPhar.to;
+
+			// 既にインストール済みならスキップ
 			if( utils79.is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
 				rlv(); return;
 			}
 
-			var _pathCurrentDir = process.cwd();
-			process.chdir( _this.pathDataDir+'/commands/composer/' );
-
-			var cmd = _this.options.path_php + ' -r "readfile(\'https://getcomposer.org/installer\');" | ' + _this.options.path_php;
-			// console.log(cmd);
-			var proc = require('child_process').exec(cmd, function(){
-				// console.log('installing composer.phar done!');
-				rlv();return;
+			fsX.copy(pathComposerPhar.from, pathComposerPhar.to, function(err){
+				if( err ){
+					console.error('FAILED to copy composer.phar.');
+					console.error(err);
+					rlv(); return;
+					return;
+				}
+				rlv(); return;
+				return;
 			});
-
-			// console.log(_pathCurrentDir);
-			process.chdir( _pathCurrentDir );
 
 			return;
 		}); })
@@ -107,7 +114,7 @@ module.exports = function(pathDataDir, options){
 			return;
 		}); })
 		.then(function(){
-			cb(true);
+			callback(true);
 		})
 		;
 
@@ -310,6 +317,5 @@ module.exports = function(pathDataDir, options){
 
 
 	// データオブジェクトをロード
-	this.db = {};
 	this.db = this.loadSync();
 };
