@@ -1,52 +1,53 @@
 /**
  * px2dt-localdata-access
  */
-module.exports = new (function(){
+module.exports = function(pathDataDir, options){
 	var fs = require('fs');
+	var fsX = require('fs-extra');
 	var path = require('path');
 	var mkdirp = require('mkdirp');
 	var php = require('phpjs');
+	var utils79 = require('utils79');
 	var Promise = require("es6-promise").Promise;
 	var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 
-	function px2dtLocalDataAccess(pathDataDir, options){
-		var _this = this;
-		this.pathDataDir = path.resolve(pathDataDir)+DIRECTORY_SEPARATOR;
-		this.options = options || {};
-		this.options.path_php = this.options.path_php||'php';
-		this.options.path_php_ini = this.options.path_php_ini||null;
-		this.options.path_extension_dir = this.options.path_extension_dir||null;
-		this.db = {};
-		this.db = this.loadSync();
-	}
+	var _this = this;
+	this.db = {}; // db.json
+	this.pathDataDir = path.resolve(pathDataDir)+DIRECTORY_SEPARATOR;
+	this.options = options || {};
+	this.options.path_php = this.options.path_php||'php';
+	this.options.path_php_ini = this.options.path_php_ini||null;
+	this.options.path_extension_dir = this.options.path_extension_dir||null;
 
 	/**
 	 * データディレクトリの初期化
 	 */
-	px2dtLocalDataAccess.prototype.initDataDir = function(cb){
-		cb = cb || function(){};
+	this.initDataDir = function(callback){
+		callback = callback || function(){};
 		var _this = this;
 
 		(function(){ return new Promise(function(rlv, rjt){
-			if( _this.is_dir(_this.pathDataDir) ){
+			rlv();return;
+		}); })()
+		.then(function(){ return new Promise(function(rlv, rjt){
+			if( utils79.is_dir(_this.pathDataDir) ){
 				rlv(); return;
 			}
-			if( _this.is_file(_this.pathDataDir) ){
-				rjt(); return;
+			if( utils79.is_file(_this.pathDataDir) ){
+				console.error('FAILED to initialize data directory; A file is Already exists; - '+_this.pathDataDir);
+				callback(false);
+				return;
 			}
 			mkdirp(_this.pathDataDir, function (err) {
 				if (err){
-					rjt();
-				}else{
-					rlv();
+					console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir);
+					callback(false);
+					return;
 				}
+				rlv();
 			});
 			return;
-		}); })()
-		.catch(function(reason){
-			// console.log(reason);
-			cb(false);
-		})
+		}); })
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// データJSON初期化
 			_this.db = _this.db||{};
@@ -63,41 +64,41 @@ module.exports = new (function(){
 			rlv();
 		}); })
 		.then(function(){ return new Promise(function(rlv, rjt){
-			// composer.phar をインストール
-			if( _this.is_dir(_this.pathDataDir+'/commands/composer/') ){
+			// composer.phar のインストール先ディレクトリ作成
+			if( utils79.is_dir(_this.pathDataDir+'/commands/composer/') ){
 				rlv(); return;
 			}
 			mkdirp(_this.pathDataDir+'/commands/composer/', function (err) {
 				if (err){
-					rjt();
-				}else{
-					rlv();
+					console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir+'/commands/composer/');
+					callback(false);
+					return;
 				}
+				rlv();
 			});
 			return;
 		}); })
-		.catch(function(reason){
-			// console.log(reason);
-			cb(false);
-		})
 		.then(function(){ return new Promise(function(rlv, rjt){
 			// composer.phar をインストール
-			if( _this.is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
+			var pathComposerPhar = {
+				'from': require('path').resolve(__dirname+'/../files/composer.phar') ,
+				'to': require('path').resolve(_this.pathDataDir+'/commands/composer/composer.phar')
+			};
+			_this.db.commands.composer = pathComposerPhar.to;
+
+			// 既にインストール済みならスキップ
+			if( utils79.is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
 				rlv(); return;
 			}
 
-			var _pathCurrentDir = process.cwd();
-			process.chdir( _this.pathDataDir+'/commands/composer/' );
-
-			var cmd = _this.options.path_php + ' -r "readfile(\'https://getcomposer.org/installer\');" | ' + _this.options.path_php;
-			// console.log(cmd);
-			var proc = require('child_process').exec(cmd, function(){
-				// console.log('installing composer.phar done!');
-				rlv();return;
+			fsX.copy(pathComposerPhar.from, pathComposerPhar.to, function(err){
+				if( err ){
+					console.error('FAILED to copy composer.phar.');
+					console.error(err);
+				}
+				rlv(); return;
+				return;
 			});
-
-			// console.log(_pathCurrentDir);
-			process.chdir( _pathCurrentDir );
 
 			return;
 		}); })
@@ -110,7 +111,7 @@ module.exports = new (function(){
 			return;
 		}); })
 		.then(function(){
-			cb(true);
+			callback(true);
 		})
 		;
 
@@ -120,10 +121,15 @@ module.exports = new (function(){
 	/**
 	 * データを読み込む(同期)
 	 */
-	px2dtLocalDataAccess.prototype.loadSync = function(){
+	this.loadSync = function(){
 		var db = {};
-		if( fs.existsSync(this.pathDataDir+'/db.json') ){
-			db = require( this.pathDataDir+'/db.json' );
+		if( utils79.is_file(this.pathDataDir+'/db.json') ){
+			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+			try {
+				db = JSON.parse(json.toString());
+			} catch (e) {
+				console.error('FAILED to parse db.json');
+			}
 		}
 		return db;
 	}
@@ -131,39 +137,63 @@ module.exports = new (function(){
 	/**
 	 * データを読み込む
 	 */
-	px2dtLocalDataAccess.prototype.load = function(cb){
-		cb = cb || function(){};
+	this.load = function(callback){
+		callback = callback || function(){};
 
 		var db = {};
-		if( fs.existsSync(this.pathDataDir+'/db.json') ){
-			db = require( this.pathDataDir+'/db.json' );
+		if( utils79.is_file(this.pathDataDir+'/db.json') ){
+			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+			try {
+				db = JSON.parse(json.toString());
+			} catch (e) {
+				console.error('FAILED to parse db.json');
+			}
 		}
-		cb(db);
+		callback(db);
 		return this;
 	}
 
 	/**
 	 * データを保存する
 	 */
-	px2dtLocalDataAccess.prototype.save = function(cb){
-		cb = cb || function(){};
-		fs.writeFile(this.pathDataDir+'/db.json', JSON.stringify(this.db,null,1), function(err){
-			var result = true;
-			if(err){result = false;}
-			cb(result);
-		});
-		return this;
+	this.save = function(callback){
+		callback = callback || function(){};
+		var _path_db = this.pathDataDir+'/db.json';
+		try {
+			fs.writeFile(_path_db+'.tmp', JSON.stringify(this.db,null,1), function(err){
+				var result = true;
+				if(err){
+					result = false;
+					_this.log('ERROR on saving db.json; FAILED to save db.json.tmp; ' + err);
+					callback(result);
+					return;
+				}
+
+				err = fs.renameSync(_path_db+'.tmp', _path_db);
+				if( err ){
+					_this.log('ERROR on saving db.json; FAILED to rename db.json.tmp to db.json; ' + err);
+				}
+				// _this.log('Success to save db.json;');
+				callback( (err === undefined ? true : false) );
+				return;
+			});
+			return;
+		} catch (e) {
+			_this.log('ERROR on saving db.json; FAILED to save db.json with unknown error.');
+			callback(false);
+		}
+		return;
 	}
 
 	/**
 	 * データを取得する
 	 */
-	px2dtLocalDataAccess.prototype.getData = function(cb){
-		cb = cb || function(){};
+	this.getData = function(callback){
+		callback = callback || function(){};
 		var _this = this;
 		setTimeout(
 			function(){
-				cb( _this.db );
+				callback( _this.db );
 			}, 0
 		);
 		return this;
@@ -173,20 +203,20 @@ module.exports = new (function(){
 	 * プロジェクト情報を追加する
 	 *
 	 * @param object pjInfo 追加するプロジェクト情報
-	 * @param function cb コールバック
+	 * @param function callback コールバック
 	 * 追加したプロジェクトのコードナンバーが渡されます。
 	 * プロジェクトを追加すると、nameによって並べ替えられます。
 	 * コードナンバーはプロジェクトに対して固有ではなく、並べ替えによって変更される可能性があることに注意してください。
 	 */
-	px2dtLocalDataAccess.prototype.addProject = function(pjInfo, cb){
-		cb = cb || function(){};
+	this.addProject = function(pjInfo, callback){
+		callback = callback || function(){};
 		this.db = this.db || {};
 		this.db.projects = this.db.projects || [];
 
-		if(typeof(pjInfo) !== typeof({})){ cb(false);return this; }
-		if(typeof(pjInfo.name) !== typeof('')){ cb(false);return this; }
-		if(typeof(pjInfo.path) !== typeof('')){ cb(false);return this; }
-		if(typeof(pjInfo.entry_script) !== typeof('')){ cb(false);return this; }
+		if(typeof(pjInfo) !== typeof({})){ callback(false);return this; }
+		if(typeof(pjInfo.name) !== typeof('')){ callback(false);return this; }
+		if(typeof(pjInfo.path) !== typeof('')){ callback(false);return this; }
+		if(typeof(pjInfo.entry_script) !== typeof('')){ callback(false);return this; }
 
 		this.db.projects.push(pjInfo);
 
@@ -201,55 +231,55 @@ module.exports = new (function(){
 		for( var pjCd in this.db.projects ){
 			pjCd = pjCd-0;
 			if( this.db.projects[pjCd].name == pjInfo.name && this.db.projects[pjCd].path == pjInfo.path && this.db.projects[pjCd].entry_script == pjInfo.entry_script ){
-				cb(pjCd);
+				callback(pjCd);
 				return;
 			}
 		}
 
-		cb(false);
+		callback(false);
 		return this;
 	}
 
 	/**
 	 * プロジェクト情報の一覧を取得する
 	 */
-	px2dtLocalDataAccess.prototype.getProjectAll = function(cb){
-		cb = cb || function(){};
-		cb(this.db.projects);
-		return this;
+	this.getProjectAll = function(callback){
+		callback = callback || function(){};
+		callback(this.db.projects);
+		return;
 	}
 
 	/**
 	 * プロジェクト情報を取得する
 	 */
-	px2dtLocalDataAccess.prototype.getProject = function(pjCd, cb){
-		cb = cb || function(){};
-		cb(this.db.projects[pjCd]);
-		return this;
+	this.getProject = function(pjCd, callback){
+		callback = callback || function(){};
+		callback(this.db.projects[pjCd]);
+		return;
 	}
 
 	/**
 	 * プロジェクト情報を削除する
 	 */
-	px2dtLocalDataAccess.prototype.removeProject = function(pjCd, cb){
-		cb = cb || function(){};
+	this.removeProject = function(pjCd, callback){
+		callback = callback || function(){};
 		if(typeof(pjCd) != typeof(0)){
-			cb(false);
-			return this;
+			callback(false);
+			return;
 		}
 
 		var beforeLen = this.db.projects.length;
 		this.db.projects.splice( pjCd, 1 );
 		var afterLen = this.db.projects.length;
 
-		cb( beforeLen === (afterLen+1) );
-		return this;
+		callback( beforeLen === (afterLen+1) );
+		return;
 	}
 
 	/**
 	 * ログ情報を保存する
 	 */
-	px2dtLocalDataAccess.prototype.log = function(msg){
+	this.log = function(msg){
 		var path = this.pathDataDir + 'common_log.log';
 		var time = ( (function(){
 			var d = new Date();
@@ -278,42 +308,11 @@ module.exports = new (function(){
 	/**
 	 * データディレクトリのパスを取得する
 	 */
-	px2dtLocalDataAccess.prototype.getPathDataDir = function(){
+	this.getPathDataDir = function(){
 		return this.pathDataDir;
 	}
 
-	/**
-	 * ファイルが存在するか調べる
-	 */
-	px2dtLocalDataAccess.prototype.is_file = function(path){
-		if( !fs.existsSync(path) ){
-			return false;
-		}
-		if( !fs.statSync(path).isFile() ){
-			return false;
-		}
-		return true;
-	}
 
-	/**
-	 * ディレクトリが存在するか調べる
-	 */
-	px2dtLocalDataAccess.prototype.is_dir = function(path){
-		if( !fs.existsSync(path) ){
-			return false;
-		}
-		if( !fs.statSync(path).isDirectory() ){
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Px2DTLDAオブジェクトを作成する
-	 */
-	this.create = function(pathDataDir, options){
-		var px2dtLDA = new px2dtLocalDataAccess(pathDataDir, options);
-		return px2dtLDA;
-	}
-
-})();
+	// データオブジェクトをロード
+	this.db = this.loadSync();
+};
