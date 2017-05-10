@@ -23,48 +23,46 @@ px2dtLDA.initDataDir(
 	}
 );
 
+// ファイルからデータを読み込む
+px2dtLDA.load(function(db){
+	console.log(db);
+});
+
 // プロジェクト情報を追加
-px2dtLDA.addProject(
-	{
-		"name":"Your Project Name",
-		"path":"/path/to/your/project/",
-		"entry_script":".px_execute.php"
-	} ,
-	function(projectIndexNumber){
-		console.log(projectIndexNumber);
-	}
-);
+var projectIndexNumber = px2dtLDA.addProject({
+	"name":"Your Project Name",
+	"path":"/path/to/your/project/",
+	"entry_script":".px_execute.php"
+});
 
 // プロジェクト情報を取得
-px2dtLDA.getProject(
-	0, // <- projectIndexNumber
-	function(pjInfo){
-		console.log(pjInfo);
-	}
+var pjInfo = px2dtLDA.getProject(
+	0 // <- projectIndexNumber or ProjectID
 );
 
 // 全プロジェクトインスタンスを取得
-px2dtLDA.getProjectAll(
-	function(pjList){
-		console.log(pjList);
-	}
-);
+var pjList = px2dtLDA.getProjectAll();
 
 // プロジェクトインスタンスを取得
-px2dtLDA.project(
-	0, // <- projectIndexNumber
-	function(pjInstance){
-		console.log(pjInstance);
-	}
+var pjInstance = px2dtLDA.project(
+	0 // <- projectIndexNumber or ProjectID
 );
 
 // プロジェクト情報を削除
-px2dtLDA.removeProject(
-	0, // <- projectIndexNumber
-	function(result){
-		console.log(result);
-	}
+var result = px2dtLDA.removeProject(
+	0 // <- projectIndexNumber or ProjectID
 );
+
+// db.json 内の全てのデータをそのまま取得する
+var db = px2dtLDA.getData();
+
+// db.json 内の全てのデータをそのまま受け取って置き換える
+var result = px2dtLDA.setData(
+	{ /* 更新データ全体 */ }
+);
+
+// データディレクトリのパスを取得する
+var pathDataDir = px2dtLDA.getPathDataDir();
 
 // プロジェクトの変更を保存する
 px2dtLDA.save(
@@ -72,25 +70,6 @@ px2dtLDA.save(
 		console.log(result);
 	}
 );
-
-// db.json 内の全てのデータをそのまま取得する
-px2dtLDA.getData(
-	function(db){
-		console.log(db);
-	}
-);
-
-// db.json 内の全てのデータをそのまま受け取って置き換える
-px2dtLDA.setData(
-	{ /* 更新データ全体 */ },
-	function(result){
-		console.log(result);
-	}
-);
-
-// データディレクトリのパスを取得する
-var pathDataDir = px2dtLDA.getPathDataDir();
-console.log( pathDataDir );
 
 // ログ情報を追記する
 px2dtLDA.log('test log message.');

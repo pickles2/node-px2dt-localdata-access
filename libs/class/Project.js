@@ -15,22 +15,19 @@ module.exports = function(px2dtLDA, pjCd){
 	/**
 	 * プロジェクト情報を取得する
 	 */
-	this.get = function(callback){
-		callback = callback || function(){};
+	this.get = function(){
 		var rtn = px2dtLDA.db.projects[this.index];
 
 		if( typeof(rtn.id) === typeof('') ){
 			// IDがセットされている場合はそのまま答える。
-			callback(rtn);
-			return;
+			return rtn;
 		}
 
 		// プロジェクトがID文字列を持つ仕様は後から追加されたものなので、
 		// 古い環境に考慮して、存在しない場合には発行処理を行う。
 		px2dtLDA.db.projects[this.index].id = px2dtLDA.generateNewProjectId();
 
-		callback(px2dtLDA.db.projects[this.index]);
-		return;
+		return px2dtLDA.db.projects[this.index];
 	}
 
 	/**
@@ -39,9 +36,8 @@ module.exports = function(px2dtLDA, pjCd){
 	this.set = function(pjData, callback){
 		callback = callback || function(){};
 		px2dtLDA.db.projects[this.index] = pjData;
-		this.get(function(pjInfo){
-			callback(true);
-		});
-		return;
+		this.get();
+		return true;
 	}
+
 };

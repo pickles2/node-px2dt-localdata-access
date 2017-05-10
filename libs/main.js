@@ -27,96 +27,113 @@ module.exports = function(pathDataDir, options){
 		callback = callback || function(){};
 		var _this = this;
 
-		(function(){ return new Promise(function(rlv, rjt){
-			rlv();return;
-		}); })()
-		.then(function(){ return new Promise(function(rlv, rjt){
-			if( utils79.is_dir(_this.pathDataDir) ){
-				rlv(); return;
-			}
-			if( utils79.is_file(_this.pathDataDir) ){
-				console.error('FAILED to initialize data directory; A file is Already exists; - '+_this.pathDataDir);
-				callback(false);
-				return;
-			}
-			mkdirp(_this.pathDataDir, function (err) {
-				if (err){
-					console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir);
+		(function(){ return new Promise(function(rlv, rjt){rlv();return;}); })()
+			.then(function(){ return new Promise(function(rlv, rjt){
+				if( utils79.is_dir(_this.pathDataDir) ){
+					rlv(); return;
+				}
+				if( utils79.is_file(_this.pathDataDir) ){
+					console.error('FAILED to initialize data directory; A file is Already exists; - '+_this.pathDataDir);
 					callback(false);
 					return;
 				}
-				rlv();
-			});
-			return;
-		}); })
-		.then(function(){ return new Promise(function(rlv, rjt){
-			// データJSON初期化
-			_this.db = _this.db||{};
-			_this.db.commands = _this.db.commands||{};
-			_this.db.projects = _this.db.projects||[];
-			_this.db.network = _this.db.network||{};
-			_this.db.network.preview = _this.db.network.preview||{};
-			_this.db.network.preview.port = _this.db.network.preview.port||'';
-			_this.db.network.appserver = _this.db.network.appserver||{};
-			_this.db.network.appserver.port = _this.db.network.appserver.port||'';
-			_this.db.apps = _this.db.apps||{};
-			_this.db.apps.texteditor = _this.db.apps.texteditor||'';
-			_this.db.apps.texteditorForDir = _this.db.apps.texteditorForDir||'';
-			rlv();
-		}); })
-		.then(function(){ return new Promise(function(rlv, rjt){
-			// composer.phar のインストール先ディレクトリ作成
-			if( utils79.is_dir(_this.pathDataDir+'/commands/composer/') ){
-				rlv(); return;
-			}
-			mkdirp(_this.pathDataDir+'/commands/composer/', function (err) {
-				if (err){
-					console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir+'/commands/composer/');
-					callback(false);
-					return;
-				}
-				rlv();
-			});
-			return;
-		}); })
-		.then(function(){ return new Promise(function(rlv, rjt){
-			// composer.phar をインストール
-			var pathComposerPhar = {
-				'from': require('path').resolve(__dirname+'/../files/composer.phar') ,
-				'to': require('path').resolve(_this.pathDataDir+'/commands/composer/composer.phar')
-			};
-			_this.db.commands.composer = pathComposerPhar.to;
-
-			// 既にインストール済みならスキップ
-			if( utils79.is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
-				rlv(); return;
-			}
-
-			fsX.copy(pathComposerPhar.from, pathComposerPhar.to, function(err){
-				if( err ){
-					console.error('FAILED to copy composer.phar.');
-					console.error(err);
-				}
-				rlv(); return;
+				mkdirp(_this.pathDataDir, function (err) {
+					if (err){
+						console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir);
+						callback(false);
+						return;
+					}
+					rlv();
+				});
 				return;
-			});
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// データJSON初期化
+				_this.db = _this.db||{};
+				_this.db.commands = _this.db.commands||{};
+				_this.db.projects = _this.db.projects||[];
+				_this.db.network = _this.db.network||{};
+				_this.db.network.preview = _this.db.network.preview||{};
+				_this.db.network.preview.port = _this.db.network.preview.port||'';
+				_this.db.network.appserver = _this.db.network.appserver||{};
+				_this.db.network.appserver.port = _this.db.network.appserver.port||'';
+				_this.db.apps = _this.db.apps||{};
+				_this.db.apps.texteditor = _this.db.apps.texteditor||'';
+				_this.db.apps.texteditorForDir = _this.db.apps.texteditorForDir||'';
+				rlv();
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// composer.phar のインストール先ディレクトリ作成
+				if( utils79.is_dir(_this.pathDataDir+'/commands/composer/') ){
+					rlv(); return;
+				}
+				mkdirp(_this.pathDataDir+'/commands/composer/', function (err) {
+					if (err){
+						console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir+'/commands/composer/');
+						callback(false);
+						return;
+					}
+					rlv();
+				});
+				return;
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// composer.phar をインストール
+				var pathComposerPhar = {
+					'from': require('path').resolve(__dirname+'/../files/composer.phar') ,
+					'to': require('path').resolve(_this.pathDataDir+'/commands/composer/composer.phar')
+				};
+				_this.db.commands.composer = pathComposerPhar.to;
 
-			return;
-		}); })
-		.then(function(){ return new Promise(function(rlv, rjt){
-			// データを保存
-			_this.save(function(){
-				// console.log('saving data is done.');
-				rlv(); return;
-			});
-			return;
-		}); })
-		.then(function(){
-			callback(true);
-		})
+				// 既にインストール済みならスキップ
+				if( utils79.is_file( _this.pathDataDir+'/commands/composer/composer.phar' ) ){
+					rlv(); return;
+				}
+
+				fsX.copy(pathComposerPhar.from, pathComposerPhar.to, function(err){
+					if( err ){
+						console.error('FAILED to copy composer.phar.');
+						console.error(err);
+					}
+					rlv(); return;
+					return;
+				});
+
+				return;
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// データを保存
+				_this.save(function(){
+					// console.log('saving data is done.');
+					rlv(); return;
+				});
+				return;
+			}); })
+			.then(function(){
+				callback(true);
+			})
 		;
 
-		return this;
+		return;
+	}
+
+	/**
+	 * ファイルからデータを読み込む
+	 */
+	this.load = function(callback){
+		callback = callback || function(){};
+
+		var db = {};
+		if( utils79.is_file(this.pathDataDir+'/db.json') ){
+			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+			try {
+				db = JSON.parse(json.toString());
+			} catch (e) {
+				console.error('FAILED to parse db.json');
+			}
+		}
+		callback(db);
+		return;
 	}
 
 	/**
@@ -133,25 +150,6 @@ module.exports = function(pathDataDir, options){
 			}
 		}
 		return db;
-	}
-
-	/**
-	 * データを読み込む
-	 */
-	this.load = function(callback){
-		callback = callback || function(){};
-
-		var db = {};
-		if( utils79.is_file(this.pathDataDir+'/db.json') ){
-			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
-			try {
-				db = JSON.parse(json.toString());
-			} catch (e) {
-				console.error('FAILED to parse db.json');
-			}
-		}
-		callback(db);
-		return this;
 	}
 
 	/**
@@ -189,30 +187,16 @@ module.exports = function(pathDataDir, options){
 	/**
 	 * db.json 内の全てのデータをそのまま取得する
 	 */
-	this.getData = function(callback){
-		callback = callback || function(){};
-		var _this = this;
-		setTimeout(
-			function(){
-				callback( _this.db );
-			}, 0
-		);
-		return this;
+	this.getData = function(){
+		return this.db;
 	}
 
 	/**
 	 * db.json 内の全てのデータをそのまま受け取って置き換える
 	 */
-	this.setData = function(db, callback){
-		callback = callback || function(){};
-		var _this = this;
+	this.setData = function(db){
 		_this.db = db;
-		setTimeout(
-			function(){
-				callback( true );
-			}, 0
-		);
-		return this;
+		return true;
 	}
 
 	/**
@@ -224,15 +208,14 @@ module.exports = function(pathDataDir, options){
 	 * プロジェクトを追加すると、nameによって並べ替えられます。
 	 * コードナンバーはプロジェクトに対して固有ではなく、並べ替えによって変更される可能性があることに注意してください。
 	 */
-	this.addProject = function(pjInfo, callback){
-		callback = callback || function(){};
+	this.addProject = function(pjInfo){
 		this.db = this.db || {};
 		this.db.projects = this.db.projects || [];
 
-		if(typeof(pjInfo) !== typeof({})){ callback(false, false);return this; }
-		if(typeof(pjInfo.name) !== typeof('')){ callback(false, false);return this; }
-		if(typeof(pjInfo.path) !== typeof('')){ callback(false, false);return this; }
-		if(typeof(pjInfo.entry_script) !== typeof('')){ callback(false, false);return this; }
+		if(typeof(pjInfo) !== typeof({})){ callback(false, false);return; }
+		if(typeof(pjInfo.name) !== typeof('')){ callback(false, false);return; }
+		if(typeof(pjInfo.path) !== typeof('')){ callback(false, false);return; }
+		if(typeof(pjInfo.entry_script) !== typeof('')){ callback(false, false);return; }
 
 		pjInfo.id = this.generateNewProjectId(); // IDを自動発行
 		// console.log(pjInfo);
@@ -250,39 +233,21 @@ module.exports = function(pathDataDir, options){
 		for( var i in this.db.projects ){
 			var pjCd = i-0;
 			if( this.db.projects[pjCd].name == pjInfo.name && this.db.projects[pjCd].path == pjInfo.path && this.db.projects[pjCd].entry_script == pjInfo.entry_script ){
-				this.project(pjCd, function(pj){
-					callback(pjCd, pj);
-				})
-				return;
+				return pjCd;
 			}
 		}
-
-		callback(false, false);
-		return this;
+		return false;
 	}
 
 	/**
 	 * プロジェクトインスタンスの一覧を取得する
 	 */
-	this.getProjectAll = function(callback){
-		callback = callback || function(){};
+	this.getProjectAll = function(){
 		var rtn = [];
 		for(var i in this.db.projects){
 			rtn[i] = new Project(this, i);
 		}
-		callback(rtn);
-		return;
-	}
-
-	/**
-	 * プロジェクトインスタンスを取得する
-	 */
-	this.project = function(pjCd, callback){
-		callback = callback || function(){};
-		pjCd = this.findProjectIdxById(pjCd);
-		var pj = new Project(this, pjCd);
-		callback(pj);
-		return;
+		return rtn;
 	}
 
 	/**
@@ -291,12 +256,12 @@ module.exports = function(pathDataDir, options){
 	this.getProject = function(pjCd, callback){
 		callback = callback || function(){};
 		pjCd = this.findProjectIdxById(pjCd);
-		this.project(pjCd, function(pj){
-			pj.get(function(pjData){
-				callback(pjData);
-			});
-		});
-		return;
+		try {
+			var rtn = this.db.projects[pjCd];
+			return rtn;
+		} catch (e) {
+		}
+		return false;
 	}
 
 	/**
@@ -332,19 +297,96 @@ module.exports = function(pathDataDir, options){
 	/**
 	 * プロジェクト情報を削除する
 	 */
-	this.removeProject = function(pjCd, callback){
-		callback = callback || function(){};
+	this.removeProject = function(pjCd){
+		pjCd = this.findProjectIdxById(pjCd);
 		if(typeof(pjCd) != typeof(0)){
-			callback(false);
-			return;
+			return false;
 		}
 
 		var beforeLen = this.db.projects.length;
 		this.db.projects.splice( pjCd, 1 );
 		var afterLen = this.db.projects.length;
 
-		callback( beforeLen === (afterLen+1) );
-		return;
+		return (beforeLen === (afterLen+1));
+	}
+
+	/**
+	 * プロジェクトインスタンスを取得する
+	 */
+	this.project = function(pjCd, callback){
+		callback = callback || function(){};
+		pjCd = this.findProjectIdxById(pjCd);
+		var pj = new Project(this, pjCd);
+		return pj;
+	}
+
+
+
+
+	/**
+	 * コマンドのパスを取得する
+	 */
+	this.getCommandPath = function(cmdName){
+		var cmdPath = false;
+		try {
+			cmdPath = this.db.commands[cmdName];
+		} catch (e) {
+		}
+		return cmdPath;
+	}
+
+	/**
+	 * コマンドのパスをセットする
+	 */
+	this.setCommandPath = function(cmdName, cmdPath){
+		if( typeof(this.db.commands) !== typeof({}) ){
+			this.db.commands = {};
+		}
+		try {
+			if( cmdPath === null || cmdPath === undefined ){
+				// 削除する場合
+				this.db.commands[cmdName] = undefined;
+				delete(this.db.commands[cmdName]);
+				return true;
+			}
+			this.db.commands[cmdName] = cmdPath;
+			return true;
+		} catch (e) {
+		}
+		return false;
+	}
+
+	/**
+	 * 外部アプリケーションのパスを取得する
+	 */
+	this.getAppPath = function(appName){
+		var appPath = false;
+		try {
+			appPath = this.db.apps[appName];
+		} catch (e) {
+		}
+		return appPath;
+	}
+
+	/**
+	 * 外部アプリケーションのパスをセットする
+	 */
+	this.setAppPath = function(appName, appPath){
+		if( typeof(this.db.apps) !== typeof({}) ){
+			this.db.apps = {};
+		}
+		try {
+			if( appPath === null || appPath === undefined ){
+				// 削除する場合
+				this.db.apps[appName] = undefined;
+				delete(this.db.apps[appName]);
+				return true;
+			}
+			this.db.apps[appName] = appPath;
+			return true;
+		} catch (e) {
+		}
+		return false;
 	}
 
 	/**

@@ -76,93 +76,65 @@ describe('プロジェクト情報の入出力', function() {
 
 	it("プロジェクト情報を追加するテスト", function(done) {
 
-		px2dtLDA.addProject(
-			{
-				"name":"TestProject2",
-				"path":__dirname+'/stub_datadir/htdocs2/',
-				'entry_script':'.px_execute.php'
-			},
-			function(pjCd){
-				assert.strictEqual( pjCd, 0 );
+		var pjCd = px2dtLDA.addProject({
+			"name":"TestProject2",
+			"path":__dirname+'/stub_datadir/htdocs2/',
+			'entry_script':'.px_execute.php'
+		});
+		assert.strictEqual( pjCd, 0 );
 
-				px2dtLDA.addProject(
-					{
-						"name":"TestProject1",
-						"path":__dirname+'/stub_datadir/htdocs1/',
-						'entry_script':'.px_execute.php'
-					},
-					function(pjCd){
-						assert.strictEqual( pjCd, 0 );
-						done();
-					}
-				);
+		var pjCd = px2dtLDA.addProject(
+			{
+				"name":"TestProject1",
+				"path":__dirname+'/stub_datadir/htdocs1/',
+				'entry_script':'.px_execute.php'
 			}
 		);
+		assert.strictEqual( pjCd, 0 );
+		done();
+
 	});
 
 	it("プロジェクト情報の一覧を取得するテスト", function(done) {
 
-		px2dtLDA.getProjectAll(
-			function(result){
-				// console.log(result);
-				result[0].get(function(pjInfo){
-					assert.equal( pjInfo.name, "TestProject1" );
-					assert.equal( pjInfo.entry_script, ".px_execute.php" );
+		var result = px2dtLDA.getProjectAll();
 
-					result[1].get(function(pjInfo){
-						assert.equal( pjInfo.name, "TestProject2" );
-						assert.equal( pjInfo.entry_script, ".px_execute.php" );
+		assert.equal( result[0].get().name, "TestProject1" );
+		assert.equal( result[0].get().entry_script, ".px_execute.php" );
+		assert.equal( result[1].get().name, "TestProject2" );
+		assert.equal( result[1].get().entry_script, ".px_execute.php" );
+		done();
 
-						done();
-					});
-
-				});
-			}
-		);
 	});
 
 	it("プロジェクト情報を取得するテスト", function(done) {
 
-		px2dtLDA.getProject(
-			0,
-			function(pjInfo){
-				// console.log(pj);
-				// console.log(pjInfo);
-				assert.equal( pjInfo.name, "TestProject1" );
-				assert.equal( pjInfo.entry_script, ".px_execute.php" );
-				done();
-			}
-		);
+		var pjInfo = px2dtLDA.getProject(0);
+		// console.log(pj);
+		// console.log(pjInfo);
+		assert.equal( pjInfo.name, "TestProject1" );
+		assert.equal( pjInfo.entry_script, ".px_execute.php" );
+		done();
+
 	});
 
 	it("プロジェクトインスタンスを取得するテスト", function(done) {
 
-		px2dtLDA.project(
-			0,
-			function(pj){
-				// console.log(pj);
-				// console.log(pjInfo);
-				pj.get(function(pjInfo){
-					assert.equal( pjInfo.name, "TestProject1" );
-					assert.equal( pjInfo.entry_script, ".px_execute.php" );
-					done();
-				});
-			}
-		);
+		var pj = px2dtLDA.project(0);
+		assert.equal( pj.get().name, "TestProject1" );
+		assert.equal( pj.get().entry_script, ".px_execute.php" );
+		done();
+
 	});
 
 	it("データを取得するテスト", function(done) {
 
-		px2dtLDA.getData(
-			function(db){
-				// console.log(db);
-				assert.equal( typeof(db), typeof({}) );
-				assert.equal( typeof(db.commands), typeof({}) );
-				assert.equal( typeof(db.projects), typeof({}) );
-				assert.equal( typeof(db.apps), typeof({}) );
-				done();
-			}
-		);
+		var db = px2dtLDA.getData();
+		assert.equal( typeof(db), typeof({}) );
+		assert.equal( typeof(db.commands), typeof({}) );
+		assert.equal( typeof(db.projects), typeof({}) );
+		assert.equal( typeof(db.apps), typeof({}) );
+		done();
 	});
 
 	it("データディレクトリのパスを取得するテスト", function(done) {
@@ -175,21 +147,14 @@ describe('プロジェクト情報の入出力', function() {
 
 	it("プロジェクト情報を削除するテスト", function(done) {
 
-		px2dtLDA.removeProject(
-			0,
-			function(result){
-				assert.ok( result );
+		var result = px2dtLDA.removeProject(0);
+		assert.ok( result );
 
-				px2dtLDA.getProject(
-					0,
-					function(pjInfo){
-						assert.equal( pjInfo.name, "TestProject2" );
-						assert.equal( pjInfo.entry_script, ".px_execute.php" );
-						done();
-					}
-				);
-			}
-		);
+		var pjInfo = px2dtLDA.getProject(0);
+		assert.equal( pjInfo.name, "TestProject2" );
+		assert.equal( pjInfo.entry_script, ".px_execute.php" );
+		done();
+
 	});
 
 });
