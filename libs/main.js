@@ -220,7 +220,7 @@ module.exports = function(pathDataDir, options){
 	 *
 	 * @param object pjInfo 追加するプロジェクト情報
 	 * @param function callback コールバック
-	 * 追加したプロジェクトのコードナンバーが渡されます。
+	 * 第1引数に追加したプロジェクトのコードナンバーが、第2引数に生成されたプロジェクトインスタンスが渡されます。
 	 * プロジェクトを追加すると、nameによって並べ替えられます。
 	 * コードナンバーはプロジェクトに対して固有ではなく、並べ替えによって変更される可能性があることに注意してください。
 	 */
@@ -229,10 +229,13 @@ module.exports = function(pathDataDir, options){
 		this.db = this.db || {};
 		this.db.projects = this.db.projects || [];
 
-		if(typeof(pjInfo) !== typeof({})){ callback(false);return this; }
-		if(typeof(pjInfo.name) !== typeof('')){ callback(false);return this; }
-		if(typeof(pjInfo.path) !== typeof('')){ callback(false);return this; }
-		if(typeof(pjInfo.entry_script) !== typeof('')){ callback(false);return this; }
+		if(typeof(pjInfo) !== typeof({})){ callback(false, false);return this; }
+		if(typeof(pjInfo.name) !== typeof('')){ callback(false, false);return this; }
+		if(typeof(pjInfo.path) !== typeof('')){ callback(false, false);return this; }
+		if(typeof(pjInfo.entry_script) !== typeof('')){ callback(false, false);return this; }
+
+		pjInfo.id = this.generateNewProjectId(); // IDを自動発行
+		// console.log(pjInfo);
 
 		this.db.projects.push(pjInfo);
 
@@ -244,15 +247,17 @@ module.exports = function(pathDataDir, options){
 			return 0;
 		});
 
-		for( var pjCd in this.db.projects ){
-			pjCd = pjCd-0;
+		for( var i in this.db.projects ){
+			var pjCd = i-0;
 			if( this.db.projects[pjCd].name == pjInfo.name && this.db.projects[pjCd].path == pjInfo.path && this.db.projects[pjCd].entry_script == pjInfo.entry_script ){
-				callback(pjCd);
+				this.project(pjCd, function(pj){
+					callback(pjCd, pj);
+				})
 				return;
 			}
 		}
 
-		callback(false);
+		callback(false, false);
 		return this;
 	}
 
@@ -274,6 +279,7 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.project = function(pjCd, callback){
 		callback = callback || function(){};
+		pjCd = this.findProjectIdxById(pjCd);
 		var pj = new Project(this, pjCd);
 		callback(pj);
 		return;
@@ -284,12 +290,43 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.getProject = function(pjCd, callback){
 		callback = callback || function(){};
+		pjCd = this.findProjectIdxById(pjCd);
 		this.project(pjCd, function(pj){
 			pj.get(function(pjData){
 				callback(pjData);
 			});
 		});
 		return;
+	}
+
+	/**
+	 * プロジェクトIDからインデックス番号を取得する
+	 */
+	this.findProjectIdxById = function(pjId){
+		if( this.db.projects[pjId] ){
+			return pjId;
+		}
+		for( var i = 0; this.db.projects.length < i; i ++ ){
+			if(this.db.projects[i].id == pjId){
+				return i;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 新しいプロジェクトIDを生成する
+	 */
+	this.generateNewProjectId = function(){
+		var newId = false;
+		for( var i = 0; i < 100; i++ ){
+			newId = 'PJ-'+utils79.md5((new Date().getTime())+'-'+Math.floor( Math.random() * 1000000 ));
+			if( this.findProjectIdxById(newId) === false ){
+				// 重複がなければ成功
+				return newId;
+			}
+		}
+		return false;
 	}
 
 	/**

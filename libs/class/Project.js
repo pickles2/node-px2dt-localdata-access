@@ -27,7 +27,7 @@ module.exports = function(px2dtLDA, pjCd){
 
 		// プロジェクトがID文字列を持つ仕様は後から追加されたものなので、
 		// 古い環境に考慮して、存在しない場合には発行処理を行う。
-		px2dtLDA.db.projects[this.index].id = 'PJ-'+utils79.md5((new Date().getTime())+'-'+Math.floor( Math.random() * 1000000 ));
+		px2dtLDA.db.projects[this.index].id = px2dtLDA.generateNewProjectId();
 
 		callback(px2dtLDA.db.projects[this.index]);
 		return;
