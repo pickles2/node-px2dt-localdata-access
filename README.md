@@ -1,6 +1,6 @@
 # px2dt-localdata-access
 
-px2dt-localdata-access は、 Pickles 2 のデスクトップアプリケーションに共通する機能を提供します。
+`px2dt-localdata-access` は、 Pickles 2 のデスクトップアプリケーションに共通する機能を提供します。
 
 
 ## インストール - Install
@@ -43,10 +43,18 @@ px2dtLDA.getProject(
 	}
 );
 
-// 全プロジェクト情報を取得
+// 全プロジェクトインスタンスを取得
 px2dtLDA.getProjectAll(
 	function(pjList){
 		console.log(pjList);
+	}
+);
+
+// プロジェクトインスタンスを取得
+px2dtLDA.project(
+	0, // <- projectIndexNumber
+	function(pjInstance){
+		console.log(pjInstance);
 	}
 );
 
@@ -65,10 +73,18 @@ px2dtLDA.save(
 	}
 );
 
-// データを取得する
+// db.json 内の全てのデータをそのまま取得する
 px2dtLDA.getData(
 	function(db){
 		console.log(db);
+	}
+);
+
+// db.json 内の全てのデータをそのまま受け取って置き換える
+px2dtLDA.setData(
+	{ /* 更新データ全体 */ },
+	function(result){
+		console.log(result);
 	}
 );
 
@@ -86,11 +102,86 @@ px2dtLDA.log('test log message.');
 ```js
 var Px2DtLDA = require('px2dt-localdata-access'),
 	px2dtLDA = new Px2DtLDA(
-		'/path/to/data_directory/',
+		'/path/to/data_directory/', // データディレクトリのパス (required)
 		{
 			"path_php": "/path/to/php" // PHPコマンドのパス
 			"path_php_ini": "/path/to/php.ini" // php.iniのパス
 			"path_extension_dir": "/path/to/ext" // extension_dirのパス
 		}
 	);
+```
+
+## 扱うデータ仕様
+
+### データ格納ディレクトリ
+
+コンストラクタ第1引数に渡されたパスにデータを格納します。
+
+### ファイルとディレクトリ構造
+
+```
+├ db.json
+├ common_log.log
+├ commands
+│　└ composer
+│　　　└ composer.phar
+└ logs
+　├ access-{YYYYMMDD}.log
+　├ access-{YYYYMMDD}.log
+　├ ・・・・
+　└ access-{YYYYMMDD}.log
+```
+
+- `db.json` が主に設定情報を格納する本体です。
+- `commands/` には、ツールが内部で呼び出すためのコマンド類を格納します。
+- 汎用的なログ出力先として `common_log.log` があります。
+- `logs/` には、プレビューサーバーのアクセスログなどその他特別なログが出力されます。
+
+### `db.json` の構造定義
+
+```json
+{
+ "commands": {
+  "php": "/realpath/to/php",
+  "git": "/realpath/to/git",
+  "composer": "/realpath/to/composer.phar"
+ },
+ "apps": {
+  "texteditor": "/realpath/to/textEditor.app",
+  "texteditorForDir": "/realpath/to/textEditor.app"
+ },
+ "projects": [
+  {
+   "name": "Project Name 1",
+   "path": "/realpath/to/project1/htdocs",
+   "home_dir": "px-files/",
+   "entry_script": ".px_execute.php"
+  },
+  {
+   "name": "Project Name 2",
+   "path": "/realpath/to/project2/htdocs",
+   "home_dir": "px-files/",
+   "entry_script": ".px_execute.php"
+  },
+  {
+	  /* ・・・・・・ */
+  },
+  {
+   "name": "Project Name N",
+   "path": "/realpath/to/projectN/htdocs",
+   "home_dir": "px-files/",
+   "entry_script": ".px_execute.php"
+  }
+ ],
+ "network": {
+  "preview": {
+   "port": "58080",
+   "accessRestriction": "loopback"
+  },
+  "appserver": {
+   "port": "58081"
+  }
+ },
+ "language": "ja"
+}
 ```

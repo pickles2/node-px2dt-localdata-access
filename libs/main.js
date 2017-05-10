@@ -10,6 +10,7 @@ module.exports = function(pathDataDir, options){
 	var utils79 = require('utils79');
 	var Promise = require("es6-promise").Promise;
 	var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
+	var Project = require('./class/Project.js');
 
 	var _this = this;
 	this.db = {}; // db.json
@@ -186,7 +187,7 @@ module.exports = function(pathDataDir, options){
 	}
 
 	/**
-	 * データを取得する
+	 * db.json 内の全てのデータをそのまま取得する
 	 */
 	this.getData = function(callback){
 		callback = callback || function(){};
@@ -194,6 +195,21 @@ module.exports = function(pathDataDir, options){
 		setTimeout(
 			function(){
 				callback( _this.db );
+			}, 0
+		);
+		return this;
+	}
+
+	/**
+	 * db.json 内の全てのデータをそのまま受け取って置き換える
+	 */
+	this.setData = function(db, callback){
+		callback = callback || function(){};
+		var _this = this;
+		_this.db = db;
+		setTimeout(
+			function(){
+				callback( true );
 			}, 0
 		);
 		return this;
@@ -241,11 +257,25 @@ module.exports = function(pathDataDir, options){
 	}
 
 	/**
-	 * プロジェクト情報の一覧を取得する
+	 * プロジェクトインスタンスの一覧を取得する
 	 */
 	this.getProjectAll = function(callback){
 		callback = callback || function(){};
-		callback(this.db.projects);
+		var rtn = [];
+		for(var i in this.db.projects){
+			rtn[i] = new Project(this, i);
+		}
+		callback(rtn);
+		return;
+	}
+
+	/**
+	 * プロジェクトインスタンスを取得する
+	 */
+	this.project = function(pjCd, callback){
+		callback = callback || function(){};
+		var pj = new Project(this, pjCd);
+		callback(pj);
 		return;
 	}
 
@@ -254,7 +284,11 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.getProject = function(pjCd, callback){
 		callback = callback || function(){};
-		callback(this.db.projects[pjCd]);
+		this.project(pjCd, function(pj){
+			pj.get(function(pjData){
+				callback(pjData);
+			});
+		});
 		return;
 	}
 

@@ -104,11 +104,19 @@ describe('プロジェクト情報の入出力', function() {
 
 		px2dtLDA.getProjectAll(
 			function(result){
-				assert.equal( result[0].name, "TestProject1" );
-				assert.equal( result[0].entry_script, ".px_execute.php" );
-				assert.equal( result[1].name, "TestProject2" );
-				assert.equal( result[1].entry_script, ".px_execute.php" );
-				done();
+				// console.log(result);
+				result[0].get(function(pjInfo){
+					assert.equal( pjInfo.name, "TestProject1" );
+					assert.equal( pjInfo.entry_script, ".px_execute.php" );
+
+					result[1].get(function(pjInfo){
+						assert.equal( pjInfo.name, "TestProject2" );
+						assert.equal( pjInfo.entry_script, ".px_execute.php" );
+
+						done();
+					});
+
+				});
 			}
 		);
 	});
@@ -117,10 +125,28 @@ describe('プロジェクト情報の入出力', function() {
 
 		px2dtLDA.getProject(
 			0,
-			function(result){
-				assert.equal( result.name, "TestProject1" );
-				assert.equal( result.entry_script, ".px_execute.php" );
+			function(pjInfo){
+				// console.log(pj);
+				// console.log(pjInfo);
+				assert.equal( pjInfo.name, "TestProject1" );
+				assert.equal( pjInfo.entry_script, ".px_execute.php" );
 				done();
+			}
+		);
+	});
+
+	it("プロジェクトインスタンスを取得するテスト", function(done) {
+
+		px2dtLDA.project(
+			0,
+			function(pj){
+				// console.log(pj);
+				// console.log(pjInfo);
+				pj.get(function(pjInfo){
+					assert.equal( pjInfo.name, "TestProject1" );
+					assert.equal( pjInfo.entry_script, ".px_execute.php" );
+					done();
+				});
 			}
 		);
 	});
@@ -156,9 +182,9 @@ describe('プロジェクト情報の入出力', function() {
 
 				px2dtLDA.getProject(
 					0,
-					function(result){
-						assert.equal( result.name, "TestProject2" );
-						assert.equal( result.entry_script, ".px_execute.php" );
+					function(pjInfo){
+						assert.equal( pjInfo.name, "TestProject2" );
+						assert.equal( pjInfo.entry_script, ".px_execute.php" );
 						done();
 					}
 				);
