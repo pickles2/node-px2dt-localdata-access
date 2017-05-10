@@ -212,13 +212,31 @@ module.exports = function(pathDataDir, options){
 		this.db = this.db || {};
 		this.db.projects = this.db.projects || [];
 
-		if(typeof(pjInfo) !== typeof({})){ callback(false, false);return; }
-		if(typeof(pjInfo.name) !== typeof('')){ callback(false, false);return; }
-		if(typeof(pjInfo.path) !== typeof('')){ callback(false, false);return; }
-		if(typeof(pjInfo.entry_script) !== typeof('')){ callback(false, false);return; }
+		if(typeof(pjInfo) !== typeof({})){ return false; }
+		if(typeof(pjInfo.name) !== typeof('')){ return false; }
+		if(typeof(pjInfo.path) !== typeof('')){ return false; }
+		if(typeof(pjInfo.entry_script) !== typeof('')){ return false; }
+		// if(typeof(pjInfo.home_dir) !== typeof('')){ return false; }
 
 		pjInfo.id = this.generateNewProjectId(); // IDを自動発行
+		pjInfo.path = require('path').resolve(pjInfo.path); // path を整形
 		// console.log(pjInfo);
+
+		// 未定義のキーを削除
+		for( var key in pjInfo ){
+			switch( key ){
+				case 'id':
+				case 'path':
+				case 'name':
+				case 'entry_script':
+				case 'home_dir':
+					break;
+				default:
+					pjInfo[key] = undefined;
+					delete(pjInfo[key]);
+					break;
+			}
+		}
 
 		this.db.projects.push(pjInfo);
 
@@ -332,6 +350,9 @@ module.exports = function(pathDataDir, options){
 			cmdPath = this.db.commands[cmdName];
 		} catch (e) {
 		}
+		if( cmdPath === undefined ){
+			return false;
+		}
 		return cmdPath;
 	}
 
@@ -349,7 +370,7 @@ module.exports = function(pathDataDir, options){
 				delete(this.db.commands[cmdName]);
 				return true;
 			}
-			this.db.commands[cmdName] = cmdPath;
+			this.db.commands[cmdName] = require('path').resolve(cmdPath);
 			return true;
 		} catch (e) {
 		}
@@ -364,6 +385,9 @@ module.exports = function(pathDataDir, options){
 		try {
 			appPath = this.db.apps[appName];
 		} catch (e) {
+		}
+		if( appPath === undefined ){
+			return false;
 		}
 		return appPath;
 	}
@@ -382,11 +406,74 @@ module.exports = function(pathDataDir, options){
 				delete(this.db.apps[appName]);
 				return true;
 			}
-			this.db.apps[appName] = appPath;
+			this.db.apps[appName] = utils79.trim(appPath);
 			return true;
 		} catch (e) {
 		}
 		return false;
+	}
+
+	/**
+	 * ネットワーク設定を取得する
+	 */
+	this.getNetworkSetting = function(networkSettingName){
+		var appPath = false;
+		try {
+			appPath = this.db.network[networkSettingName];
+		} catch (e) {
+		}
+		if( appPath === undefined ){
+			return false;
+		}
+		return appPath;
+	}
+
+	/**
+	 * ネットワーク設定をセットする
+	 */
+	this.setNetworkSetting = function(networkSettingName, networkSetting){
+		if( typeof(this.db.network) !== typeof({}) ){
+			this.db.network = {};
+		}
+		try {
+			if( networkSetting === null || networkSetting === undefined ){
+				// 削除する場合
+				this.db.network[networkSettingName] = undefined;
+				delete(this.db.network[networkSettingName]);
+				return true;
+			}
+			if( typeof(networkSetting) != typeof({}) ){
+				networkSetting = {};
+			}
+			this.db.network[networkSettingName] = networkSetting;
+		} catch (e) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 自然言語設定を取得する
+	 */
+	this.getLanguage = function(){
+		if( !this.db.language ){
+			return 'en';//デフォルト
+		}
+		return this.db.language;
+	}
+
+	/**
+	 * 自然言語設定をセットする
+	 */
+	this.setLanguage = function(language){
+		if( typeof(language) != typeof('') ){
+			return false;
+		}
+		if( !language.length ){
+			return false;
+		}
+		this.db.language = utils79.trim(language);
+		return true;
 	}
 
 	/**
