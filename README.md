@@ -134,7 +134,13 @@ var Px2DtLDA = require('px2dt-localdata-access'),
    "name": "Project Name 1",
    "path": "/realpath/to/project1/htdocs",
    "home_dir": "px-files/",
-   "entry_script": ".px_execute.php"
+   "entry_script": ".px_execute.php",
+   "extended":{
+	   "key1":"value",
+	   "key2":{
+		   "key3":"value"
+	   }
+   }
   },
   {
    "name": "Project Name 2",

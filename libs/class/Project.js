@@ -65,6 +65,35 @@ module.exports = function(px2dtLDA, pjCd){
 	}
 
 	/**
+	 * 拡張フィールドからデータを取得する
+	 */
+	this.getExtendedData = function( key ){
+		if(typeof(key) != typeof('')){
+			return false;
+		}
+		try {
+			var rtn = px2dtLDA.db.projects[this.index].extended[key];
+			return rtn;
+		} catch (e) {
+		}
+		return undefined;
+	}
+
+	/**
+	 * 拡張フィールドにデータをセットする
+	 */
+	this.setExtendedData = function( key, value ){
+		if(typeof(key) != typeof('')){
+			return false;
+		}
+		if( typeof(px2dtLDA.db.projects[this.index].extended) != typeof({}) ){
+			px2dtLDA.db.projects[this.index].extended = {};
+		}
+		px2dtLDA.db.projects[this.index].extended[key] = value;
+		return true;
+	}
+
+	/**
 	 * プロジェクト情報を取得する
 	 */
 	this.get = function(){

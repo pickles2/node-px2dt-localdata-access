@@ -10,16 +10,16 @@ var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 var Px2DtLDA = require('../libs/main.js'),
 	px2dtLDA = new Px2DtLDA(_baseDir, {});
 
-function dataClean( cb ){
-	cb = cb || function(){};
-	// cb(true);return;
+function dataClean( callback ){
+	callback = callback || function(){};
+	// callback(true);return;
 
 	if( fs.existsSync(_baseDir) ){
 		rmdir( _baseDir, function(){
-			cb(!fs.existsSync(_baseDir));
+			callback(!fs.existsSync(_baseDir));
 		} );
 	}else{
-		cb(!fs.existsSync(_baseDir));
+		callback(!fs.existsSync(_baseDir));
 	}
 	return;
 }
@@ -29,6 +29,10 @@ describe('データディレクトリを一旦削除するテスト', function()
 		this.timeout(10000);
 		dataClean(function(result){
 			assert.ok( result );
+
+			// px2dtLDAをリロード
+			px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 			setTimeout(done, 500);
 		});
 	});
@@ -129,6 +133,11 @@ describe('自然言語設定の入出力', function() {
 		var result = px2dtLDA.getLanguage();
 		// console.log(result);
 		assert.strictEqual( result, 'en-US' );
+
+		px2dtLDA.setLanguage('en');
+		var result = px2dtLDA.getLanguage();
+		// console.log(result);
+		assert.strictEqual( result, 'en' );
 
 		done();
 
@@ -242,6 +251,29 @@ describe('プロジェクト情報の入出力', function() {
 		var realpathEntryScript = pj.getRealpathEntryScript();
 		// console.log(realpathEntryScript);
 		assert.equal( realpathEntryScript, require('path').resolve(pj.getPath() + '/' + pj.getEntryScript()) );
+
+		done();
+
+	});
+
+	it("プロジェクトインスタンスからプロジェクト拡張情報を更新するテスト", function(done) {
+
+		var pj = px2dtLDA.project(1);
+
+		assert.strictEqual( pj.getExtendedData('test4'), undefined );
+
+		assert.ok( pj.setExtendedData('test1', 'testVal1') );
+		assert.equal( pj.getExtendedData('test1'), 'testVal1' );
+
+		assert.ok( pj.setExtendedData('test2', {'val2': 'testVal2'}) );
+		assert.equal( pj.getExtendedData('test2').val2, 'testVal2' );
+
+		assert.ok( pj.setExtendedData('test3', {'val2': 'testVal2'}) );
+		assert.ok( pj.setExtendedData('test3', undefined) );
+		assert.strictEqual( pj.getExtendedData('test3'), undefined );
+
+
+		// console.log(px2dtLDA.getData());
 
 		done();
 
