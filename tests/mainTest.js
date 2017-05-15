@@ -10,16 +10,16 @@ var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 var Px2DtLDA = require('../libs/main.js'),
 	px2dtLDA = new Px2DtLDA(_baseDir, {});
 
-function dataClean( cb ){
-	cb = cb || function(){};
-	// cb(true);return;
+function dataClean( callback ){
+	callback = callback || function(){};
+	// callback(true);return;
 
 	if( fs.existsSync(_baseDir) ){
 		rmdir( _baseDir, function(){
-			cb(!fs.existsSync(_baseDir));
+			callback(!fs.existsSync(_baseDir));
 		} );
 	}else{
-		cb(!fs.existsSync(_baseDir));
+		callback(!fs.existsSync(_baseDir));
 	}
 	return;
 }
@@ -29,6 +29,10 @@ describe('データディレクトリを一旦削除するテスト', function()
 		this.timeout(10000);
 		dataClean(function(result){
 			assert.ok( result );
+
+			// px2dtLDAをリロード
+			px2dtLDA = new Px2DtLDA(_baseDir, {});
+
 			setTimeout(done, 500);
 		});
 	});
@@ -72,71 +76,217 @@ describe('ファイルとディレクトリの存在確認テスト', function()
 
 });
 
+describe('コマンドパスの入出力', function() {
+
+	it("コマンドパスの入出力", function(done) {
+
+		var result = px2dtLDA.getCommandPath('composer');
+		// console.log(result);
+		assert.ok( utils79.is_file(result) );
+		done();
+
+	});
+
+	it("設定のないコマンドパス", function(done) {
+
+		var result = px2dtLDA.getCommandPath('undefined');
+		// console.log(result);
+		assert.strictEqual( result, false );
+		done();
+
+	});
+
+});
+
+describe('外部アプリケーションのパスの入出力', function() {
+
+	it("外部アプリケーションのパスの入出力", function(done) {
+
+		var result = px2dtLDA.getAppPath('texteditor');
+		// console.log(result);
+		assert.strictEqual( typeof(result), typeof('') );
+
+		var result = px2dtLDA.setAppPath('texteditor', '/path/to/Editor.app');
+		assert.strictEqual( result, true );
+
+		var result = px2dtLDA.getAppPath('texteditor');
+		// console.log(result);
+		assert.strictEqual( result, '/path/to/Editor.app' );
+
+		done();
+
+	});
+
+});
+
+describe('自然言語設定の入出力', function() {
+
+	it("自然言語設定の入出力", function(done) {
+
+		var result = px2dtLDA.getLanguage();
+		// console.log(result);
+		assert.strictEqual( result, 'en' );
+
+		var result = px2dtLDA.setLanguage('en-US');
+		assert.strictEqual( result, true );
+
+		var result = px2dtLDA.getLanguage();
+		// console.log(result);
+		assert.strictEqual( result, 'en-US' );
+
+		px2dtLDA.setLanguage('en');
+		var result = px2dtLDA.getLanguage();
+		// console.log(result);
+		assert.strictEqual( result, 'en' );
+
+		done();
+
+	});
+
+});
+
 describe('プロジェクト情報の入出力', function() {
 
 	it("プロジェクト情報を追加するテスト", function(done) {
 
-		px2dtLDA.addProject(
-			{
-				"name":"TestProject2",
-				"path":__dirname+'/stub_datadir/htdocs2/',
-				'entry_script':'.px_execute.php'
-			},
-			function(pjCd){
-				assert.strictEqual( pjCd, 0 );
+		var pjCd = px2dtLDA.addProject({
+			"name":"TestProject2",
+			"path":__dirname+'/stub_datadir/htdocs2/',
+			'entry_script':'.px_execute.php'
+		});
+		assert.strictEqual( pjCd, 0 );
 
-				px2dtLDA.addProject(
-					{
-						"name":"TestProject1",
-						"path":__dirname+'/stub_datadir/htdocs1/',
-						'entry_script':'.px_execute.php'
-					},
-					function(pjCd){
-						assert.strictEqual( pjCd, 0 );
-						done();
-					}
-				);
+		var pjCd = px2dtLDA.addProject(
+			{
+				"name":"TestProject1",
+				"path":__dirname+'/stub_datadir/htdocs1/',
+				'entry_script':'.px_execute.php'
 			}
 		);
+		assert.strictEqual( pjCd, 0 );
+
+		var pjCd = px2dtLDA.addProject(
+			{
+				"name":"TestProject3",
+				"path":__dirname+'/stub_datadir/htdocs3/',
+				'entry_script':'.px_execute.php',
+				'undefined_key_1': 'value_1',
+				'undefined_key_2': 'value_2',
+				'undefined_key_3': 'value_3'
+			}
+		);
+		assert.strictEqual( pjCd, 2 );
+
+		var pj = px2dtLDA.project(pjCd);
+		assert.strictEqual( pj.get().undefined_key_1, undefined );
+		assert.strictEqual( pj.get().undefined_key_2, undefined );
+		assert.strictEqual( pj.get().undefined_key_3, undefined );
+		assert.strictEqual( pj.get().undefined_key_4, undefined );
+
+		// --------------------------------------
+		// 必要な情報が入力されていないことによる失敗例
+		var pjCd = px2dtLDA.addProject(
+			{
+				"name":"TestProject3",
+				'entry_script':'.px_execute.php'
+			}
+		);
+		assert.strictEqual( pjCd, false );
+
+		done();
+
 	});
 
 	it("プロジェクト情報の一覧を取得するテスト", function(done) {
 
-		px2dtLDA.getProjectAll(
-			function(result){
-				assert.equal( result[0].name, "TestProject1" );
-				assert.equal( result[0].entry_script, ".px_execute.php" );
-				assert.equal( result[1].name, "TestProject2" );
-				assert.equal( result[1].entry_script, ".px_execute.php" );
-				done();
-			}
-		);
+		var result = px2dtLDA.getProjectAll();
+
+		assert.equal( result[0].get().name, "TestProject1" );
+		assert.equal( result[0].get().entry_script, ".px_execute.php" );
+		assert.equal( result[1].get().name, "TestProject2" );
+		assert.equal( result[1].get().entry_script, ".px_execute.php" );
+		done();
+
 	});
 
 	it("プロジェクト情報を取得するテスト", function(done) {
 
-		px2dtLDA.getProject(
-			0,
-			function(result){
-				assert.equal( result.name, "TestProject1" );
-				assert.equal( result.entry_script, ".px_execute.php" );
-				done();
-			}
-		);
+		var pjInfo = px2dtLDA.getProject(0);
+		// console.log(pj);
+		// console.log(pjInfo);
+		assert.equal( pjInfo.name, "TestProject1" );
+		assert.equal( pjInfo.entry_script, ".px_execute.php" );
+		done();
+
+	});
+
+	it("プロジェクトインスタンスを取得するテスト", function(done) {
+
+		var pj = px2dtLDA.project(0);
+		assert.equal( pj.get().name, "TestProject1" );
+		assert.equal( pj.get().entry_script, ".px_execute.php" );
+		done();
+
+	});
+
+	it("プロジェクトインスタンスからプロジェクト情報を更新するテスト", function(done) {
+
+		var pj = px2dtLDA.project(0);
+
+		// プロジェクト名
+		assert.equal( pj.get().name, "TestProject1" );
+		assert.equal( pj.getName(), pj.get().name );
+		assert.equal( pj.setName("TestProject1-change1"), true );
+		assert.equal( pj.getName(), "TestProject1-change1" );
+
+		// パス
+		assert.equal( pj.get().path, require('path').resolve(__dirname+'/stub_datadir/htdocs1/') );
+		assert.equal( pj.getPath(), pj.get().path );
+
+		// Entry Script
+		assert.equal( pj.get().entry_script, ".px_execute.php" );
+		assert.equal( pj.getEntryScript(), pj.get().entry_script );
+
+		// Entry Script (realpath)
+		var realpathEntryScript = pj.getRealpathEntryScript();
+		// console.log(realpathEntryScript);
+		assert.equal( realpathEntryScript, require('path').resolve(pj.getPath() + '/' + pj.getEntryScript()) );
+
+		done();
+
+	});
+
+	it("プロジェクトインスタンスからプロジェクト拡張情報を更新するテスト", function(done) {
+
+		var pj = px2dtLDA.project(1);
+
+		assert.strictEqual( pj.getExtendedData('test4'), undefined );
+
+		assert.ok( pj.setExtendedData('test1', 'testVal1') );
+		assert.equal( pj.getExtendedData('test1'), 'testVal1' );
+
+		assert.ok( pj.setExtendedData('test2', {'val2': 'testVal2'}) );
+		assert.equal( pj.getExtendedData('test2').val2, 'testVal2' );
+
+		assert.ok( pj.setExtendedData('test3', {'val2': 'testVal2'}) );
+		assert.ok( pj.setExtendedData('test3', undefined) );
+		assert.strictEqual( pj.getExtendedData('test3'), undefined );
+
+
+		// console.log(px2dtLDA.getData());
+
+		done();
+
 	});
 
 	it("データを取得するテスト", function(done) {
 
-		px2dtLDA.getData(
-			function(db){
-				// console.log(db);
-				assert.equal( typeof(db), typeof({}) );
-				assert.equal( typeof(db.commands), typeof({}) );
-				assert.equal( typeof(db.projects), typeof({}) );
-				assert.equal( typeof(db.apps), typeof({}) );
-				done();
-			}
-		);
+		var db = px2dtLDA.getData();
+		assert.equal( typeof(db), typeof({}) );
+		assert.equal( typeof(db.commands), typeof({}) );
+		assert.equal( typeof(db.projects), typeof({}) );
+		assert.equal( typeof(db.apps), typeof({}) );
+		done();
 	});
 
 	it("データディレクトリのパスを取得するテスト", function(done) {
@@ -149,21 +299,14 @@ describe('プロジェクト情報の入出力', function() {
 
 	it("プロジェクト情報を削除するテスト", function(done) {
 
-		px2dtLDA.removeProject(
-			0,
-			function(result){
-				assert.ok( result );
+		var result = px2dtLDA.removeProject(0);
+		assert.ok( result );
 
-				px2dtLDA.getProject(
-					0,
-					function(result){
-						assert.equal( result.name, "TestProject2" );
-						assert.equal( result.entry_script, ".px_execute.php" );
-						done();
-					}
-				);
-			}
-		);
+		var pjInfo = px2dtLDA.getProject(0);
+		assert.equal( pjInfo.name, "TestProject2" );
+		assert.equal( pjInfo.entry_script, ".px_execute.php" );
+		done();
+
 	});
 
 });
