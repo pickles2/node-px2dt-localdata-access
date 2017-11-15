@@ -220,11 +220,31 @@ describe('プロジェクト情報の入出力', function() {
 
 	});
 
+	it("プロジェクト情報をIDで取得するテスト", function(done) {
+
+		var pjInfo1 = px2dtLDA.getProject(0);
+		var pjInfo2 = px2dtLDA.getProject(pjInfo1.id);
+		assert.equal( typeof(pjInfo1.id), typeof('') );
+		assert.equal( pjInfo1.id, pjInfo2.id );
+		done();
+
+	});
+
 	it("プロジェクトインスタンスを取得するテスト", function(done) {
 
 		var pj = px2dtLDA.project(0);
 		assert.equal( pj.get().name, "TestProject1" );
 		assert.equal( pj.get().entry_script, ".px_execute.php" );
+		done();
+
+	});
+
+	it("プロジェクトインスタンスをIDで取得するテスト", function(done) {
+
+		var pj1 = px2dtLDA.project(0);
+		var pj2 = px2dtLDA.project(pj1.get().id);
+		assert.equal( typeof(pj1.get().id), typeof('') );
+		assert.equal( pj1.get().id, pj2.get().id );
 		done();
 
 	});

@@ -289,7 +289,7 @@ module.exports = function(pathDataDir, options){
 		if( this.db.projects[pjId] ){
 			return pjId;
 		}
-		for( var i = 0; this.db.projects.length < i; i ++ ){
+		for( var i = 0; this.db.projects.length > i; i ++ ){
 			if(this.db.projects[i].id == pjId){
 				return i;
 			}
