@@ -1,10 +1,10 @@
 /**
- * classProject.js
+ * class/Project.js
  */
 module.exports = function(px2dtLDA, pjCd){
 	var Promise = require("es6-promise").Promise;
 	var utils79 = require('utils79');
-	// console.log(utils79);
+	var Px2Package = require('./Px2Package.js');
 
 	try {
 		this.index = pjCd;
@@ -127,6 +127,13 @@ module.exports = function(px2dtLDA, pjCd){
 		px2dtLDA.db.projects[this.index] = pjData;
 		this.get();
 		return true;
+	}
+
+	/**
+	 * px2packageオブジェクトを取得する
+	 */
+	this.px2package = function(){
+		return new Px2Package(px2dtLDA, this);
 	}
 
 };

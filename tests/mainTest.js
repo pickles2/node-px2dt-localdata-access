@@ -249,6 +249,15 @@ describe('プロジェクト情報の入出力', function() {
 
 	});
 
+	it("px2packageインスタンスを取得するテスト (未定義の場合)", function(done) {
+
+		var px2package = px2dtLDA.project(0).px2package();
+		assert.equal( typeof(px2package), typeof({}) );
+		assert.strictEqual( px2package.get(), false );
+		done();
+
+	});
+
 	it("プロジェクトインスタンスからプロジェクト情報を更新するテスト", function(done) {
 
 		var pj = px2dtLDA.project(0);
@@ -330,6 +339,38 @@ describe('プロジェクト情報の入出力', function() {
 	});
 
 });
+
+describe('px2packageインスタンスを取得するテスト', function() {
+	it("px2packageインスタンスを取得するテスト", function(done) {
+
+		var pjCd = px2dtLDA.addProject({
+			"name":"px2package Test",
+			"path":__dirname+'/px2/standard/'
+		});
+		assert.strictEqual( pjCd, 0 );
+
+		var px2package = px2dtLDA.project(0).px2package();
+		assert.equal( typeof(px2package), typeof({}) );
+		assert.strictEqual( px2package.get()[0].name, "px2dt-localdata-access test site" );
+		assert.strictEqual( px2package.get()[0].type, "project" );
+		assert.strictEqual( px2package.get()[0].path, ".px_execute.php" );
+		assert.strictEqual( px2package.get()[0].path_homedir, "px-files/" );
+		done();
+
+	});
+
+	it("プライマリのプロジェクトを取得するテスト", function(done) {
+
+		var px2package = px2dtLDA.project(0).px2package();
+		assert.strictEqual( px2package.getPrimaryProject().name, "px2dt-localdata-access test site" );
+		assert.strictEqual( px2package.getPrimaryProject().type, "project" );
+		assert.strictEqual( px2package.getPrimaryProject().path, ".px_execute.php" );
+		assert.strictEqual( px2package.getPrimaryProject().path_homedir, "px-files/" );
+		done();
+
+	});
+});
+
 
 describe('データを保存するテスト', function() {
 	it("db.json を保存", function(done) {

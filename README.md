@@ -48,6 +48,11 @@ var pjInstance = px2dtLDA.project(
 	0 // <- projectIndexNumber or ProjectID
 );
 
+// px2package情報インスタンスを取得
+var px2pkg = px2dtLDA.project(0).px2package();
+console.log(px2pkg.get()); // px2package情報一式を取得
+console.log(px2pkg.getPrimaryProject()); // プライマリのプロジェクト情報を取得
+
 // プロジェクト情報を削除
 var result = px2dtLDA.removeProject(
 	0 // <- projectIndexNumber or ProjectID

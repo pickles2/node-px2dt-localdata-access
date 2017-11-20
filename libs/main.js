@@ -215,7 +215,7 @@ module.exports = function(pathDataDir, options){
 		if(typeof(pjInfo) !== typeof({})){ return false; }
 		if(typeof(pjInfo.name) !== typeof('')){ return false; }
 		if(typeof(pjInfo.path) !== typeof('')){ return false; }
-		if(typeof(pjInfo.entry_script) !== typeof('')){ return false; }
+		// if(typeof(pjInfo.entry_script) !== typeof('')){ return false; } // px2package に記述される可能性を考慮して、必須項目から除外
 		// if(typeof(pjInfo.home_dir) !== typeof('')){ return false; }
 
 		pjInfo.id = this.generateNewProjectId(); // IDを自動発行
