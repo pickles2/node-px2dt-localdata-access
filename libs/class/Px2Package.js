@@ -12,8 +12,15 @@ module.exports = function(px2dtLDA, pj){
 
 	(function(){
 		var tmpPath = realpathEntryScript;
+			// MEMO:
+			// 	プロジェクトの設定で `entry_script` が空欄になっている場合、
+			// 	`realpathEntryScript` はディレクトリのパスを格納している。
+			// 	そのため、はじめに評価するべき `composer.json` のパスは、
+			// 	```
+			// 	tmpPath+'/composer.json'
+			// 	```
+			// 	となる。
 		while(1){
-			tmpPath = utils79.dirname(tmpPath);
 			if(utils79.is_file(tmpPath+'/composer.json')){
 				realpathComposerJson = tmpPath+'/composer.json';
 				try {
@@ -28,10 +35,10 @@ module.exports = function(px2dtLDA, pj){
 				composerJson = false;
 				break;
 			}
+			tmpPath = utils79.dirname(tmpPath);
 		}
 		return;
 	})();
-	// console.log(realpathEntryScript, realpathComposerJson, composerJson);
 
 
 	/**
