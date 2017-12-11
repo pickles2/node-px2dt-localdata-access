@@ -5,6 +5,7 @@ module.exports = function(px2dtLDA){
 	var watcher;
 	var eventBuffer = [];
 	var eventFlushTimer;
+	var fs = require('fs');
 
 	/**
 	 * ファイルの書き込み監視を開始する
@@ -12,7 +13,7 @@ module.exports = function(px2dtLDA){
 	this.start = function(){
 		this.stop();
 		try {
-			watcher = require('fs').watch(
+			watcher = fs.watch(
 				px2dtLDA.pathDataDir,
 				{
 					"recursive": true

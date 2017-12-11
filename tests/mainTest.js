@@ -443,6 +443,7 @@ describe('外部でデータが更新されたときに自動リロードする�
 describe('テスト後にデータディレクトリを削除する', function() {
 
 	it("テスト後の後始末", function(done) {
+		px2dtLDA.watcher.stop();
 		dataClean(function(result){
 			assert.ok( result );
 			assert.ok( !utils79.is_file(_baseDir+'db.json') );
