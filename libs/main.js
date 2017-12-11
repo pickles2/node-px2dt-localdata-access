@@ -19,6 +19,11 @@ module.exports = function(pathDataDir, options){
 	this.options.path_php = this.options.path_php||'php';
 	this.options.path_php_ini = this.options.path_php_ini||null;
 	this.options.path_extension_dir = this.options.path_extension_dir||null;
+	this.options.updated = this.options.updated || function(updateEvents){};
+
+	var Watcher = require('./class/Watcher.js'),
+		watcher = new Watcher(this);
+	watcher.start();
 
 	/**
 	 * データディレクトリの初期化
@@ -109,6 +114,11 @@ module.exports = function(pathDataDir, options){
 				});
 				return;
 			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// ファイルの書き込み監視を開始
+				watcher.start();
+				rlv(); return;
+			}); })
 			.then(function(){
 				callback(true);
 			})
@@ -132,6 +142,7 @@ module.exports = function(pathDataDir, options){
 				console.error('FAILED to parse db.json');
 			}
 		}
+		_this.db = db;
 		callback(db);
 		return;
 	}
@@ -149,6 +160,7 @@ module.exports = function(pathDataDir, options){
 				console.error('FAILED to parse db.json');
 			}
 		}
+		this.db = db;
 		return db;
 	}
 

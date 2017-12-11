@@ -97,7 +97,7 @@ module.exports = function(px2dtLDA, pjCd){
 	 * プロジェクト情報を取得する
 	 */
 	this.get = function(){
-		var rtn = false;
+		var rtn;
 
 		try {
 			rtn = px2dtLDA.db.projects[this.index];

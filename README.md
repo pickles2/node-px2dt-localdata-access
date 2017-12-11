@@ -88,9 +88,14 @@ var Px2DtLDA = require('px2dt-localdata-access'),
 	px2dtLDA = new Px2DtLDA(
 		'/path/to/data_directory/', // データディレクトリのパス (required)
 		{
-			"path_php": "/path/to/php" // PHPコマンドのパス
-			"path_php_ini": "/path/to/php.ini" // php.iniのパス
-			"path_extension_dir": "/path/to/ext" // extension_dirのパス
+			"path_php": "/path/to/php", // PHPコマンドのパス
+			"path_php_ini": "/path/to/php.ini", // php.iniのパス
+			"path_extension_dir": "/path/to/ext", // extension_dirのパス
+			"updated": function(updatedEvents){
+				// データディレクトリ内に変更があった場合に検知し、
+				// コールバックされます。
+				console.log(updatedEvents);
+			}
 		}
 	);
 ```

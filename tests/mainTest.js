@@ -8,7 +8,7 @@ var _baseDir = __dirname+'/stub_datadir/px2dt/';
 var Promise = require("es6-promise").Promise;
 var DIRECTORY_SEPARATOR = (process.platform=='win32'?'\\':'/');
 var Px2DtLDA = require('../libs/main.js'),
-	px2dtLDA = new Px2DtLDA(_baseDir, {});
+	px2dtLDA;
 
 function dataClean( callback ){
 	callback = callback || function(){};
@@ -31,7 +31,11 @@ describe('データディレクトリを一旦削除するテスト', function()
 			assert.ok( result );
 
 			// px2dtLDAをリロード
-			px2dtLDA = new Px2DtLDA(_baseDir, {});
+			px2dtLDA = new Px2DtLDA(_baseDir, {
+				"updated": function(updatedEvents){
+					console.log('Data dir update watcher:', updatedEvents);
+				}
+			});
 
 			setTimeout(done, 500);
 		});
@@ -381,10 +385,13 @@ describe('データを保存するテスト', function() {
 			assert.ok( !utils79.is_file(_baseDir+'db.json.tmp') );
 			var db = JSON.parse(fs.readFileSync(_baseDir+'db.json').toString());
 			assert.ok( typeof(db) === typeof({}) );
-			done();
+			setTimeout(function(){
+				done();
+			}, 500);
 		});
 	});
 });
+
 
 describe('ログ情報', function() {
 
@@ -399,10 +406,39 @@ describe('ログ情報', function() {
 		// console.log(logText);
 
 		assert.ok( utils79.is_file(_baseDir+'common_log.log') );
-		done();
+		setTimeout(function(){
+			done();
+		}, 500);
 	});
 
 });
+
+describe('外部でデータが更新されたときに自動リロードするテスト', function() {
+	it("自動リロード", function(done) {
+
+		var pj = px2dtLDA.project(0);
+
+		// プロジェクト名
+		assert.equal( pj.get().name, "px2package Test" );
+		assert.equal( pj.getName(), pj.get().name );
+		assert.equal( pj.setName("TestProject1-change1"), true );
+		assert.equal( pj.getName(), "TestProject1-change1" );
+
+        // 外部プロセスが情報を書き換える
+		var db = JSON.parse(fs.readFileSync(_baseDir+'db.json').toString());
+		db.changedByOuterProcess = 'Changed by outer process';
+		db.projects[0].name = 'Changed by outer process';
+		fs.writeFileSync(_baseDir+'db.json', JSON.stringify(db, null, 2))
+
+		setTimeout(function(){
+			assert.equal( px2dtLDA.db.changedByOuterProcess, "Changed by outer process" );
+			assert.equal( pj.get().name, "Changed by outer process" );
+			assert.equal( pj.getName(), pj.get().name );
+			done();
+		}, 500);
+	});
+});
+
 
 describe('テスト後にデータディレクトリを削除する', function() {
 
@@ -411,7 +447,9 @@ describe('テスト後にデータディレクトリを削除する', function()
 			assert.ok( result );
 			assert.ok( !utils79.is_file(_baseDir+'db.json') );
 			assert.ok( !utils79.is_dir(_baseDir) );
-			done();
+			setTimeout(function(){
+				done();
+			}, 900);
 		});
 
 	});
