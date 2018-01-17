@@ -66,6 +66,15 @@ var result = px2dtLDA.setData(
 	{ /* 更新データ全体 */ }
 );
 
+// 外部アプリケーションのパスをセットする
+var result = px2dtLDA.setAppPath(appName, appPath);
+
+// 外部アプリケーションのパスを取得する
+var appPath = px2dtLDA.getAppPath( appName );
+
+// 外部アプリケーションを起動する
+var childProc = px2dtLDA.startApp(appName, params);
+
 // データディレクトリのパスを取得する
 var pathDataDir = px2dtLDA.getPathDataDir();
 
@@ -180,3 +189,15 @@ var Px2DtLDA = require('px2dt-localdata-access'),
  "language": "ja"
 }
 ```
+
+
+## ライセンス - License
+
+MIT License
+
+
+## 作者 - Author
+
+- Tomoya Koyanagi <tomk79@gmail.com>
+- website: <http://www.pxt.jp/>
+- Twitter: @tomk79 <http://twitter.com/tomk79/>

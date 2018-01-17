@@ -426,6 +426,62 @@ module.exports = function(pathDataDir, options){
 	}
 
 	/**
+	 * 外部アプリケーションを起動する
+	 * `db.apps` に設定された外部アプリケーションを実行します。
+	 * アプリケーションパスの設定には、 `$FOO_BAR` のような変数を含めることができます。
+	 * `params` に受け取ったキーと値のセットを変数に置き換えてコマンドを補完します。
+	 * `params` のパラメータがコマンドテンプレート内に現れない場合、
+	 * スペースで区切って後ろに追加します。
+	 */
+	this.startApp = function(appName, params){
+		let param = {};
+		let isCmdTemplate = false;
+		if(typeof(params) === typeof({})){
+			param = JSON.parse(JSON.stringify(params));
+		}
+		const { exec } = require('child_process');
+		var confAppPath;
+
+		try {
+			confAppPath = this.db.apps[appName];
+		} catch (e) {
+		}
+		if(typeof(confAppPath) !== typeof('')){
+			return false;
+		}
+
+		if( confAppPath.match(/\$[a-zA-Z0-9\_]+/g) ){
+			isCmdTemplate = true;
+		}
+
+		// 変数をパラメータに置き換え
+		for(let key in param){
+			if( confAppPath.indexOf('$'+key) >= 0 ){
+				confAppPath = confAppPath.replace('$'+key, param[key]);
+				param[key] = undefined;
+				delete(param[key]);
+			}
+		}
+
+		var cmd = '';
+		if(process.platform == 'win32'){
+			cmd += confAppPath;
+		}else if(process.platform == 'darwin'){
+			cmd += (!isCmdTemplate ? 'open -a ' : '')+confAppPath;
+		}
+
+		// 残ったパラメータを後ろにつける
+		for(let key in param){
+			cmd += ' '+param[key];
+		}
+
+		// 実行
+		return exec(cmd, (err, stdout, stderr) => {
+			// console.log(err, stdout, stderr);
+		});
+	}
+
+	/**
 	 * ネットワーク設定を取得する
 	 */
 	this.getNetworkSetting = function(networkSettingName){
