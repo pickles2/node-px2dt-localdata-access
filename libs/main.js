@@ -65,6 +65,7 @@ module.exports = function(pathDataDir, options){
 				_this.db.apps = _this.db.apps||{};
 				_this.db.apps.texteditor = _this.db.apps.texteditor||'';
 				_this.db.apps.texteditorForDir = _this.db.apps.texteditorForDir||'';
+				_this.db.apps.gitClient = _this.db.apps.gitClient||'';
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
