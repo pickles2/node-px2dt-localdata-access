@@ -78,6 +78,9 @@ var childProc = px2dtLDA.startApp(appName, params);
 // データディレクトリのパスを取得する
 var pathDataDir = px2dtLDA.getPathDataDir();
 
+// アプリケーションデータの格納ディレクトリパスを取得する
+var pathAppDataDir = px2dtLDA.getAppDataDir(appName);
+
 // プロジェクトの変更を保存する
 px2dtLDA.save(
 	function(result){
@@ -123,11 +126,19 @@ var Px2DtLDA = require('px2dt-localdata-access'),
 ├ commands
 │　└ composer
 │　　　└ composer.phar
+├ appdata
+│　├ {appname1}
+│　│　└ anyfiles...
+│　├ {appname2}
+│　│　└ anyfiles...
+│　├ ・・・・
+│　└ {appnameN}
+│　　　└ anyfiles...
 └ logs
-　├ access-{YYYYMMDD}.log
-　├ access-{YYYYMMDD}.log
-　├ ・・・・
-　└ access-{YYYYMMDD}.log
+　　├ access-{YYYYMMDD}.log
+　　├ access-{YYYYMMDD}.log
+　　├ ・・・・
+　　└ access-{YYYYMMDD}.log
 ```
 
 - `db.json` が主に設定情報を格納する本体です。
@@ -146,7 +157,8 @@ var Px2DtLDA = require('px2dt-localdata-access'),
  },
  "apps": {
   "texteditor": "/realpath/to/textEditor.app",
-  "texteditorForDir": "/realpath/to/textEditor.app"
+  "texteditorForDir": "/realpath/to/textEditor.app",
+  "gitClient": "/realpath/to/gitClient.app"
  },
  "projects": [
   {

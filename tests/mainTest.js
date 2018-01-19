@@ -52,6 +52,7 @@ describe('データディレクトリを初期化するテスト', function() {
 			assert.ok( utils79.is_dir(_baseDir) );
 			assert.ok( utils79.is_file(_baseDir+'/db.json') );
 			assert.ok( utils79.is_file(_baseDir+'/commands/composer/composer.phar') );
+			assert.ok( utils79.is_dir(_baseDir+'/appdata/') );
 			done();
 		});
 	});
@@ -75,6 +76,23 @@ describe('ファイルとディレクトリの存在確認テスト', function()
 		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/'), true );
 		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/.gitkeep'), false );
 		assert.strictEqual( utils79.is_dir(__dirname+'/stub_datadir/notExists.txt'), false );
+		done();
+	});
+
+});
+
+describe('アプリケーションデータディレクトリの取得', function() {
+
+	it("取得", function(done) {
+		this.timeout(3000);
+
+		var appdir = px2dtLDA.getAppDataDir('testApp');
+		// console.log(appdir);
+		assert.strictEqual( utils79.is_dir(appdir), true );
+
+		var appdir = px2dtLDA.getAppDataDir('testSlashed/マルチバイト文字列');
+		// console.log(appdir);
+		assert.strictEqual( utils79.is_dir(appdir), true );
 		done();
 	});
 

@@ -84,6 +84,21 @@ module.exports = function(pathDataDir, options){
 				return;
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
+				// appdata ディレクトリ作成
+				if( utils79.is_dir(_this.pathDataDir+'/appdata/') ){
+					rlv(); return;
+				}
+				mkdirp(_this.pathDataDir+'/appdata/', function (err) {
+					if (err){
+						console.error('FAILED to initialize appdata directory; Could NOT make directory; - '+_this.pathDataDir+'/appdata/');
+						callback(false);
+						return;
+					}
+					rlv();
+				});
+				return;
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
 				// composer.phar をインストール
 				var pathComposerPhar = {
 					'from': require('path').resolve(__dirname+'/../files/composer.phar') ,
@@ -481,6 +496,23 @@ module.exports = function(pathDataDir, options){
 			// console.log(err, stdout, stderr);
 		});
 	}
+
+	/**
+	 * アプリケーションデータの格納ディレクトリパスを取得する
+	 */
+	 this.getAppDataDir = function(appName){
+		 if( !utils79.is_dir(_this.pathDataDir+'/appdata/') ){
+			return false;
+		 }
+		 var realpathAppData = _this.pathDataDir+'/appdata/'+encodeURIComponent(appName)+'/';
+		 if( !utils79.is_dir(realpathAppData) ){
+			require('fs').mkdirSync(realpathAppData);
+		 }
+		 if( !utils79.is_dir(realpathAppData) ){
+			return false;
+		 }
+		 return realpathAppData;
+	 }
 
 	/**
 	 * ネットワーク設定を取得する
