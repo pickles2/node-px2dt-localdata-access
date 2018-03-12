@@ -448,6 +448,8 @@ module.exports = function(pathDataDir, options){
 	 * `params` に受け取ったキーと値のセットを変数に置き換えてコマンドを補完します。
 	 * `params` のパラメータがコマンドテンプレート内に現れない場合、
 	 * スペースで区切って後ろに追加します。
+	 * また、コマンドテンプレート内に変数が現れない場合、
+	 * コマンド実体へのパスであるとみなし、スペースを含む場合はエスケープされます。
 	 */
 	this.startApp = function(appName, params){
 		let param = {};
@@ -468,6 +470,9 @@ module.exports = function(pathDataDir, options){
 
 		if( confAppPath.match(/\$[a-zA-Z0-9\_]+/g) ){
 			isCmdTemplate = true;
+		}
+		if( !isCmdTemplate ){
+			confAppPath = '"'+confAppPath+'"'; // 単体のコマンドパスと解釈して文字列化する
 		}
 
 		// 変数をパラメータに置き換え
