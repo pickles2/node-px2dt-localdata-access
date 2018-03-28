@@ -61,6 +61,7 @@ module.exports = function(px2dtLDA, pj){
 	 * 筆頭のプロジェクト情報を取得する
 	 */
 	this.getPrimaryProject = function(){
+		var rtn = false;
 		var px2pkg = this.get();
 		if( px2pkg === false ){
 			return false;
