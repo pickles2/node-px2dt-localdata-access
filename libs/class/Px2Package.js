@@ -49,10 +49,11 @@ module.exports = function(px2dtLDA, pj){
 		try {
 			if( typeof(composerJson.extra.px2package) == typeof([]) && composerJson.extra.px2package[0] ){
 				rtn = composerJson.extra.px2package;
-			}else{
+			}else if( typeof(composerJson.extra.px2package) == typeof({}) && composerJson.extra.px2package.type ){
 				rtn = [composerJson.extra.px2package];
 			}
 		} catch (e) {
+			rtn = false;
 		}
 		return rtn;
 	}
@@ -67,6 +68,9 @@ module.exports = function(px2dtLDA, pj){
 			return false;
 		}
 		for( var idx in px2pkg ){
+			if( typeof(px2pkg) != typeof({}) ){
+				continue;
+			}
 			if(px2pkg[idx].type == 'project'){
 				rtn = px2pkg[idx];
 				break;

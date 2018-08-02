@@ -391,6 +391,7 @@ describe('px2packageインスタンスを取得するテスト', function() {
 		done();
 
 	});
+
 });
 
 
@@ -454,6 +455,23 @@ describe('外部でデータが更新されたときに自動リロードする�
 			assert.equal( pj.getName(), pj.get().name );
 			done();
 		}, 500);
+	});
+});
+
+describe('データに問題がある場合のテスト', function() {
+	it("composer.json の extra が存在するが空白の場合のテスト", function(done) {
+
+		var pjCd = px2dtLDA.addProject({
+			"name":"px2package empty extra Test",
+			"path":__dirname+'/px2/empty_extra/'
+		});
+		assert.strictEqual( pjCd, 1 );
+
+		var px2package = px2dtLDA.project(1).px2package();
+		assert.equal( typeof(px2package), typeof({}) );
+		assert.strictEqual( px2package.get(), false );
+		done();
+
 	});
 });
 
