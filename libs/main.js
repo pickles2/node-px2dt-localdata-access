@@ -149,6 +149,13 @@ module.exports = function(pathDataDir, options){
 	this.load = function(callback){
 		callback = callback || function(){};
 
+		if( utils79.is_file(this.pathDataDir+'/db.json.tmp') ){
+			fs.renameSync(
+				utils79.is_file(this.pathDataDir+'/db.json.tmp'),
+				utils79.is_file(this.pathDataDir+'/db.json')
+			);
+		}
+
 		var db = {};
 		if( utils79.is_file(this.pathDataDir+'/db.json') ){
 			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
@@ -168,6 +175,12 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.loadSync = function(){
 		var db = {};
+		if( utils79.is_file(this.pathDataDir+'/db.json.tmp') ){
+			fs.renameSync(
+				utils79.is_file(this.pathDataDir+'/db.json.tmp'),
+				utils79.is_file(this.pathDataDir+'/db.json')
+			);
+		}
 		if( utils79.is_file(this.pathDataDir+'/db.json') ){
 			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
 			try {
@@ -187,7 +200,7 @@ module.exports = function(pathDataDir, options){
 		callback = callback || function(){};
 		var _path_db = this.pathDataDir+'/db.json';
 		try {
-			fs.writeFile(_path_db+'.tmp', JSON.stringify(this.db,null,1), function(err){
+			fs.writeFile(_path_db+'.tmp', JSON.stringify(_this.db,null,1), function(err){
 				var result = true;
 				if(err){
 					result = false;
@@ -196,12 +209,23 @@ module.exports = function(pathDataDir, options){
 					return;
 				}
 
-				err = fs.renameSync(_path_db+'.tmp', _path_db);
-				if( err ){
-					_this.log('ERROR on saving db.json; FAILED to rename db.json.tmp to db.json; ' + err);
-				}
-				// _this.log('Success to save db.json;');
-				callback( (err === undefined ? true : false) );
+				fs.writeFile(_path_db, JSON.stringify(_this.db,null,1), function(err){
+					var result = true;
+					if(err){
+						result = false;
+						_this.log('ERROR on saving db.json; FAILED to save db.json; ' + err);
+						callback(result);
+						return;
+					}
+
+					err = fs.unlinkSync(_path_db+'.tmp');
+					if( err ){
+						_this.log('ERROR on saving db.json; FAILED to remove db.json.tmp; ' + err);
+					}
+					// _this.log('Success to save db.json;');
+					callback( (!err ? true : false) );
+					return;
+				});
 				return;
 			});
 			return;
