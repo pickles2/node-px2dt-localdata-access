@@ -148,21 +148,18 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.load = function(callback){
 		callback = callback || function(){};
-
-		if( utils79.is_file(this.pathDataDir+'/db.json.tmp') ){
-			fs.renameSync(
-				utils79.is_file(this.pathDataDir+'/db.json.tmp'),
-				utils79.is_file(this.pathDataDir+'/db.json')
-			);
-		}
-
 		var db = {};
-		if( utils79.is_file(this.pathDataDir+'/db.json') ){
-			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+		var basename = 'db.json';
+		if( utils79.is_file(this.pathDataDir+'/db.json.tmp') ){
+			basename = 'db.json.tmp';
+		}
+		var realpathDbJson = this.pathDataDir+'/'+basename;
+		if( utils79.is_file(realpathDbJson) ){
+			var json = fs.readFileSync( realpathDbJson );
 			try {
 				db = JSON.parse(json.toString());
 			} catch (e) {
-				console.error('FAILED to parse db.json');
+				console.error('FAILED to parse '+basename);
 			}
 		}
 		_this.db = db;
@@ -175,18 +172,17 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.loadSync = function(){
 		var db = {};
+		var basename = 'db.json';
 		if( utils79.is_file(this.pathDataDir+'/db.json.tmp') ){
-			fs.renameSync(
-				utils79.is_file(this.pathDataDir+'/db.json.tmp'),
-				utils79.is_file(this.pathDataDir+'/db.json')
-			);
+			basename = 'db.json.tmp';
 		}
-		if( utils79.is_file(this.pathDataDir+'/db.json') ){
-			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+		var realpathDbJson = this.pathDataDir+'/'+basename;
+		if( utils79.is_file(realpathDbJson) ){
+			var json = fs.readFileSync( realpathDbJson );
 			try {
 				db = JSON.parse(json.toString());
 			} catch (e) {
-				console.error('FAILED to parse db.json');
+				console.error('FAILED to parse '+basename);
 			}
 		}
 		this.db = db;
