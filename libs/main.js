@@ -19,6 +19,11 @@ module.exports = function(pathDataDir, options){
 	this.options.path_php = this.options.path_php||'php';
 	this.options.path_php_ini = this.options.path_php_ini||null;
 	this.options.path_extension_dir = this.options.path_extension_dir||null;
+	this.options.updated = this.options.updated || function(updateEvents){};
+
+	var Watcher = require('./class/Watcher.js');
+	this.watcher = new Watcher(this);
+	this.watcher.start();
 
 	/**
 	 * データディレクトリの初期化
@@ -60,6 +65,7 @@ module.exports = function(pathDataDir, options){
 				_this.db.apps = _this.db.apps||{};
 				_this.db.apps.texteditor = _this.db.apps.texteditor||'';
 				_this.db.apps.texteditorForDir = _this.db.apps.texteditorForDir||'';
+				_this.db.apps.gitClient = _this.db.apps.gitClient||'';
 				rlv();
 			}); })
 			.then(function(){ return new Promise(function(rlv, rjt){
@@ -70,6 +76,21 @@ module.exports = function(pathDataDir, options){
 				mkdirp(_this.pathDataDir+'/commands/composer/', function (err) {
 					if (err){
 						console.error('FAILED to initialize data directory; Could NOT make directory; - '+_this.pathDataDir+'/commands/composer/');
+						callback(false);
+						return;
+					}
+					rlv();
+				});
+				return;
+			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// appdata ディレクトリ作成
+				if( utils79.is_dir(_this.pathDataDir+'/appdata/') ){
+					rlv(); return;
+				}
+				mkdirp(_this.pathDataDir+'/appdata/', function (err) {
+					if (err){
+						console.error('FAILED to initialize appdata directory; Could NOT make directory; - '+_this.pathDataDir+'/appdata/');
 						callback(false);
 						return;
 					}
@@ -109,6 +130,11 @@ module.exports = function(pathDataDir, options){
 				});
 				return;
 			}); })
+			.then(function(){ return new Promise(function(rlv, rjt){
+				// ファイルの書き込み監視を開始
+				_this.watcher.start();
+				rlv(); return;
+			}); })
 			.then(function(){
 				callback(true);
 			})
@@ -122,16 +148,21 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.load = function(callback){
 		callback = callback || function(){};
-
 		var db = {};
-		if( utils79.is_file(this.pathDataDir+'/db.json') ){
-			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+		var basename = 'db.json';
+		if( utils79.is_file(this.pathDataDir+'/db.json.tmp') ){
+			basename = 'db.json.tmp';
+		}
+		var realpathDbJson = this.pathDataDir+'/'+basename;
+		if( utils79.is_file(realpathDbJson) ){
+			var json = fs.readFileSync( realpathDbJson );
 			try {
 				db = JSON.parse(json.toString());
 			} catch (e) {
-				console.error('FAILED to parse db.json');
+				console.error('FAILED to parse '+basename);
 			}
 		}
+		_this.db = db;
 		callback(db);
 		return;
 	}
@@ -141,14 +172,20 @@ module.exports = function(pathDataDir, options){
 	 */
 	this.loadSync = function(){
 		var db = {};
-		if( utils79.is_file(this.pathDataDir+'/db.json') ){
-			var json = fs.readFileSync( this.pathDataDir+'/db.json' );
+		var basename = 'db.json';
+		if( utils79.is_file(this.pathDataDir+'/db.json.tmp') ){
+			basename = 'db.json.tmp';
+		}
+		var realpathDbJson = this.pathDataDir+'/'+basename;
+		if( utils79.is_file(realpathDbJson) ){
+			var json = fs.readFileSync( realpathDbJson );
 			try {
 				db = JSON.parse(json.toString());
 			} catch (e) {
-				console.error('FAILED to parse db.json');
+				console.error('FAILED to parse '+basename);
 			}
 		}
+		this.db = db;
 		return db;
 	}
 
@@ -159,7 +196,7 @@ module.exports = function(pathDataDir, options){
 		callback = callback || function(){};
 		var _path_db = this.pathDataDir+'/db.json';
 		try {
-			fs.writeFile(_path_db+'.tmp', JSON.stringify(this.db,null,1), function(err){
+			fs.writeFile(_path_db+'.tmp', JSON.stringify(_this.db,null,1), function(err){
 				var result = true;
 				if(err){
 					result = false;
@@ -168,12 +205,23 @@ module.exports = function(pathDataDir, options){
 					return;
 				}
 
-				err = fs.renameSync(_path_db+'.tmp', _path_db);
-				if( err ){
-					_this.log('ERROR on saving db.json; FAILED to rename db.json.tmp to db.json; ' + err);
-				}
-				// _this.log('Success to save db.json;');
-				callback( (err === undefined ? true : false) );
+				fs.writeFile(_path_db, JSON.stringify(_this.db,null,1), function(err){
+					var result = true;
+					if(err){
+						result = false;
+						_this.log('ERROR on saving db.json; FAILED to save db.json; ' + err);
+						callback(result);
+						return;
+					}
+
+					err = fs.unlinkSync(_path_db+'.tmp');
+					if( err ){
+						_this.log('ERROR on saving db.json; FAILED to remove db.json.tmp; ' + err);
+					}
+					// _this.log('Success to save db.json;');
+					callback( (!err ? true : false) );
+					return;
+				});
 				return;
 			});
 			return;
@@ -215,7 +263,7 @@ module.exports = function(pathDataDir, options){
 		if(typeof(pjInfo) !== typeof({})){ return false; }
 		if(typeof(pjInfo.name) !== typeof('')){ return false; }
 		if(typeof(pjInfo.path) !== typeof('')){ return false; }
-		if(typeof(pjInfo.entry_script) !== typeof('')){ return false; }
+		// if(typeof(pjInfo.entry_script) !== typeof('')){ return false; } // px2package に記述される可能性を考慮して、必須項目から除外
 		// if(typeof(pjInfo.home_dir) !== typeof('')){ return false; }
 
 		pjInfo.id = this.generateNewProjectId(); // IDを自動発行
@@ -289,7 +337,7 @@ module.exports = function(pathDataDir, options){
 		if( this.db.projects[pjId] ){
 			return pjId;
 		}
-		for( var i = 0; this.db.projects.length < i; i ++ ){
+		for( var i = 0; this.db.projects.length > i; i ++ ){
 			if(this.db.projects[i].id == pjId){
 				return i;
 			}
@@ -412,6 +460,84 @@ module.exports = function(pathDataDir, options){
 		}
 		return false;
 	}
+
+	/**
+	 * 外部アプリケーションを起動する
+	 * `db.apps` に設定された外部アプリケーションを実行します。
+	 * アプリケーションパスの設定には、 `$FOO_BAR` のような変数を含めることができます。
+	 * `params` に受け取ったキーと値のセットを変数に置き換えてコマンドを補完します。
+	 * `params` のパラメータがコマンドテンプレート内に現れない場合、
+	 * スペースで区切って後ろに追加します。
+	 * また、コマンドテンプレート内に変数が現れない場合、
+	 * コマンド実体へのパスであるとみなし、スペースを含む場合はエスケープされます。
+	 */
+	this.startApp = function(appName, params){
+		let param = {};
+		let isCmdTemplate = false;
+		if(typeof(params) === typeof({})){
+			param = JSON.parse(JSON.stringify(params));
+		}
+		const { exec } = require('child_process');
+		var confAppPath;
+
+		try {
+			confAppPath = this.db.apps[appName];
+		} catch (e) {
+		}
+		if(typeof(confAppPath) !== typeof('')){
+			return false;
+		}
+
+		if( confAppPath.match(/\$[a-zA-Z0-9\_]+/g) ){
+			isCmdTemplate = true;
+		}
+		if( !isCmdTemplate ){
+			confAppPath = '"'+confAppPath+'"'; // 単体のコマンドパスと解釈して文字列化する
+		}
+
+		// 変数をパラメータに置き換え
+		for(let key in param){
+			if( confAppPath.indexOf('$'+key) >= 0 ){
+				confAppPath = confAppPath.replace('$'+key, param[key]);
+				param[key] = undefined;
+				delete(param[key]);
+			}
+		}
+
+		var cmd = '';
+		if(process.platform == 'win32'){
+			cmd += confAppPath;
+		}else if(process.platform == 'darwin'){
+			cmd += (!isCmdTemplate ? 'open -a ' : '')+confAppPath;
+		}
+
+		// 残ったパラメータを後ろにつける
+		for(let key in param){
+			cmd += ' '+param[key];
+		}
+
+		// 実行
+		return exec(cmd, (err, stdout, stderr) => {
+			// console.log(err, stdout, stderr);
+		});
+	}
+
+	/**
+	 * アプリケーションデータの格納ディレクトリパスを取得する
+	 */
+	 this.getAppDataDir = function(appName){
+		 if( !utils79.is_dir(_this.pathDataDir+'/appdata/') ){
+			return false;
+		 }
+		 var realpathAppData = _this.pathDataDir+'/appdata/'+encodeURIComponent(appName)+'/';
+		 if( !utils79.is_dir(realpathAppData) ){
+			require('fs').mkdirSync(realpathAppData);
+		 }
+		 if( !utils79.is_dir(realpathAppData) ){
+			return false;
+		 }
+		 return realpathAppData;
+	 }
 
 	/**
 	 * ネットワーク設定を取得する

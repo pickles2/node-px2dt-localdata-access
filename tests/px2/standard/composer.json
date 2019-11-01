@@ -1,0 +1,10 @@
+{
+    "extra": {
+        "px2package": {
+            "name": "px2dt-localdata-access test site",
+            "type": "project",
+            "path": ".px_execute.php",
+            "path_homedir": "px-files/"
+        }
+    }
+}

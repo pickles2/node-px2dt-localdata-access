@@ -48,6 +48,11 @@ var pjInstance = px2dtLDA.project(
 	0 // <- projectIndexNumber or ProjectID
 );
 
+// px2package情報インスタンスを取得
+var px2pkg = px2dtLDA.project(0).px2package();
+console.log(px2pkg.get()); // px2package情報一式を取得
+console.log(px2pkg.getPrimaryProject()); // プライマリのプロジェクト情報を取得
+
 // プロジェクト情報を削除
 var result = px2dtLDA.removeProject(
 	0 // <- projectIndexNumber or ProjectID
@@ -61,8 +66,20 @@ var result = px2dtLDA.setData(
 	{ /* 更新データ全体 */ }
 );
 
+// 外部アプリケーションのパスをセットする
+var result = px2dtLDA.setAppPath(appName, appPath);
+
+// 外部アプリケーションのパスを取得する
+var appPath = px2dtLDA.getAppPath( appName );
+
+// 外部アプリケーションを起動する
+var childProc = px2dtLDA.startApp(appName, params);
+
 // データディレクトリのパスを取得する
 var pathDataDir = px2dtLDA.getPathDataDir();
+
+// アプリケーションデータの格納ディレクトリパスを取得する
+var pathAppDataDir = px2dtLDA.getAppDataDir(appName);
 
 // プロジェクトの変更を保存する
 px2dtLDA.save(
@@ -83,9 +100,14 @@ var Px2DtLDA = require('px2dt-localdata-access'),
 	px2dtLDA = new Px2DtLDA(
 		'/path/to/data_directory/', // データディレクトリのパス (required)
 		{
-			"path_php": "/path/to/php" // PHPコマンドのパス
-			"path_php_ini": "/path/to/php.ini" // php.iniのパス
-			"path_extension_dir": "/path/to/ext" // extension_dirのパス
+			"path_php": "/path/to/php", // PHPコマンドのパス
+			"path_php_ini": "/path/to/php.ini", // php.iniのパス
+			"path_extension_dir": "/path/to/ext", // extension_dirのパス
+			"updated": function(updatedEvents){
+				// データディレクトリ内に変更があった場合に検知し、
+				// コールバックされます。
+				console.log(updatedEvents);
+			}
 		}
 	);
 ```
@@ -104,11 +126,19 @@ var Px2DtLDA = require('px2dt-localdata-access'),
 ├ commands
 │　└ composer
 │　　　└ composer.phar
+├ appdata
+│　├ {appname1}
+│　│　└ anyfiles...
+│　├ {appname2}
+│　│　└ anyfiles...
+│　├ ・・・・
+│　└ {appnameN}
+│　　　└ anyfiles...
 └ logs
-　├ access-{YYYYMMDD}.log
-　├ access-{YYYYMMDD}.log
-　├ ・・・・
-　└ access-{YYYYMMDD}.log
+　　├ access-{YYYYMMDD}.log
+　　├ access-{YYYYMMDD}.log
+　　├ ・・・・
+　　└ access-{YYYYMMDD}.log
 ```
 
 - `db.json` が主に設定情報を格納する本体です。
@@ -127,7 +157,8 @@ var Px2DtLDA = require('px2dt-localdata-access'),
  },
  "apps": {
   "texteditor": "/realpath/to/textEditor.app",
-  "texteditorForDir": "/realpath/to/textEditor.app"
+  "texteditorForDir": "/realpath/to/textEditor.app",
+  "gitClient": "/realpath/to/gitClient.app"
  },
  "projects": [
   {
@@ -170,3 +201,15 @@ var Px2DtLDA = require('px2dt-localdata-access'),
  "language": "ja"
 }
 ```
+
+
+## ライセンス - License
+
+MIT License
+
+
+## 作者 - Author
+
+- Tomoya Koyanagi <tomk79@gmail.com>
+- website: <http://www.pxt.jp/>
+- Twitter: @tomk79 <http://twitter.com/tomk79/>
