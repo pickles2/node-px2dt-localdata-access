@@ -202,6 +202,12 @@ var Px2DtLDA = require('px2dt-localdata-access'),
 }
 ```
 
+## 更新履歴 - Change Log
+
+### px2dt-localdata-access v2.0.0 (2019-11-02)
+
+- Initial Relase.
+
 
 ## ライセンス - License
 
@@ -211,5 +217,5 @@ MIT License
 ## 作者 - Author
 
 - Tomoya Koyanagi <tomk79@gmail.com>
-- website: <http://www.pxt.jp/>
-- Twitter: @tomk79 <http://twitter.com/tomk79/>
+- website: <https://www.pxt.jp/>
+- Twitter: @tomk79 <https://twitter.com/tomk79/>
